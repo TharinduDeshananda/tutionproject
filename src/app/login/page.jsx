@@ -5,7 +5,7 @@ function page() {
   return (
     <div className="w-full h-[100vh] bg-orange-200 flex justify-center items-center">
       {/* top wrapper */}
-      <div className="max-w-[640px] flex flex-row bg-white min-w-[320px] rounded-md overflow-hidden shadow-md drop-shadow-md">
+      <div className="max-w-[640px] flex flex-row bg-white min-w-[320px] rounded-md overflow-hidden shadow-md drop-shadow-md w-full">
         {/* left details container */}
         <div className="min-w-[320px] min-h-[420px] items-center justify-center flex-1 hidden text-white bg-pink-700 sm:flex flex-col p-5">
           <div className="flex flex-col items-center justify-center flex-[5]">
@@ -22,7 +22,7 @@ function page() {
           </div>
         </div>
         {/* right actions container */}
-        <div className="flex-1 min-w-[320px] min-h-[420px] flex flex-col items-center py-2 text-gray-700">
+        <div className="flex-1 min-w-[320px] h-[100vh] sm:h-auto  min-h-[420px] flex flex-col items-center py-2 text-gray-700">
           <h1 className="text-2xl font-bold text-center">Login</h1>
           {/* login input fields */}
           <div className="flex flex-col items-center w-full">
@@ -31,7 +31,7 @@ function page() {
                 for="first_name"
                 class="block mb-0 text-sm font-medium text-gray-900"
               >
-                First name
+                User name
               </label>
               <input
                 type="email"
@@ -83,6 +83,9 @@ function page() {
             </div>
           </div>
           <div className="flex flex-col items-center justify-center flex-1 w-full">
+            <h1 className="text-xs text-center sm:hidden">
+              If you dont have an account create one
+            </h1>
             <button
               type="button"
               class=" text-xs mt-5 focus:outline-none text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg  px-5 py-2.5 mr-2 mb-2 "
