@@ -1,3 +1,4 @@
+import FeatureSet from "@/components/FeatureSet";
 import ImageCard from "@/components/ImageCard";
 import StudentQuoteComp from "@/components/StudentQuoteComp";
 import SwipableContainer from "@/components/SwipableContainer";
@@ -21,6 +22,10 @@ export default function Home() {
         </div>
       </div>
       <StudentQuoteComp />
+      <h1 className="my-5 mb-10 text-3xl font-bold text-center text-gray-500">
+        What you get from us!
+      </h1>
+      <FeatureSet />
     </div>
   );
 }
