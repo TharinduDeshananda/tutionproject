@@ -22,7 +22,7 @@ function page() {
           </div>
         </div>
         {/* right actions container */}
-        <div className="flex-1 min-w-[320px] min-h[400px] flex flex-col items-center py-2 text-gray-700">
+        <div className="flex-1 min-w-[320px] min-h-[420px] flex flex-col items-center py-2 text-gray-700">
           <h1 className="text-2xl font-bold text-center">Login</h1>
           {/* login input fields */}
           <div className="flex flex-col items-center w-full">
