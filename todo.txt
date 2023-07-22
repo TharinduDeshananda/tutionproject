@@ -1,0 +1,1 @@
+check image responsive with larger screens in front page large images. whetther they reszie according to larger screen sizes.
