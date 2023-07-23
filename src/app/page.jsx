@@ -1,4 +1,5 @@
 import FeatureSet from "@/components/FeatureSet";
+import Footer from "@/components/Footer";
 import ImageCard from "@/components/ImageCard";
 import StudentQuoteComp from "@/components/StudentQuoteComp";
 import SwipableContainer from "@/components/SwipableContainer";
@@ -26,6 +27,7 @@ export default function Home() {
         What you get from us!
       </h1>
       <FeatureSet />
+      <Footer />
     </div>
   );
 }
