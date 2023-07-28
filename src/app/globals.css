@@ -33,3 +33,17 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--tertiary);
 }
+
+@responsive {
+  .summary-table-sm {
+    grid-template-columns: minmax(max-content, 200px) max-content;
+    row-gap: 10px;
+    column-gap: 5px;
+  }
+
+  .summary-table-md {
+    grid-template-columns: minmax(max-content, 500px) max-content max-content max-content;
+    row-gap: 10px;
+    column-gap: 5px;
+  }
+}

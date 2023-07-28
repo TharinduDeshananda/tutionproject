@@ -1,10 +1,16 @@
 "use client";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  Children,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import ImageCard from "./ImageCard";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-function SwipableContainer() {
+function SwipableContainer({ children }) {
   const scrollRef = useRef(null);
 
   const handleScroll = function (right) {
@@ -34,14 +40,7 @@ function SwipableContainer() {
         className="flex flex-row flex-1 gap-10 px-5 justify-left "
         activationDistance={2}
       >
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
-        <ImageCard />
+        {children}
       </ScrollContainer>
 
       <FaChevronRight
