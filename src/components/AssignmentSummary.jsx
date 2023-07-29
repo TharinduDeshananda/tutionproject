@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 function AssignmentSummary() {
   const data = useMemo(() => randomAssignmentList, []);
   return (
-    <div className="w-full overflow-x-auto rounded-md shadow-lg drop-shadow-md">
+    <div className="w-full overflow-x-auto rounded-md drop-shadow-md">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

@@ -1,6 +1,44 @@
 export const testQuote =
   "A classroom is a place where young minds embark on a journey of discovery, guided by the wisdom of teachers and fueled by the curiosity of students.";
 
+export const assignmentDetils = [
+  {
+    assignmentName: "Maths area assignment",
+    class: "Maths grade 10",
+    teacher: "John Fernando",
+    dueDate: "2023-10-05",
+    status: "Submitted",
+  },
+  {
+    assignmentName: "English Essay",
+    class: "English grade 9",
+    teacher: "Emily Smith",
+    dueDate: "2023-09-25",
+    status: "Not Submitted",
+  },
+  {
+    assignmentName: "Science Experiment",
+    class: "Science grade 8",
+    teacher: "Michael Johnson",
+    dueDate: "2023-09-30",
+    status: "Submitted",
+  },
+  {
+    assignmentName: "History Research Paper",
+    class: "History grade 11",
+    teacher: "Sarah Adams",
+    dueDate: "2023-10-10",
+    status: "Submitted",
+  },
+  {
+    assignmentName: "Computer Science Project",
+    class: "Computer Science grade 12",
+    teacher: "David Lee",
+    dueDate: "2023-10-03",
+    status: "Not Submitted",
+  },
+];
+
 export const randomAssignmentList = [
   {
     className: "Class A",
@@ -81,5 +119,68 @@ export const randomAssignmentList = [
   //   assignmentsCompleted: 2,
   //   assignemntsLeft: 3,
   //   latestAssignmentDue: "3 days left",
+  // },
+];
+
+export const randomQuizesList = [
+  {
+    name: "Quiz one",
+    class: "Class A",
+    status: "Marked",
+    Marks: 45,
+  },
+  {
+    name: "Math Quiz",
+    class: "Class B",
+    status: "Not Marked",
+    Marks: 30,
+  },
+  {
+    name: "Science Test",
+    class: "Class C",
+    status: "Marked",
+    Marks: 50,
+  },
+  {
+    name: "History Quiz",
+    class: "Class A",
+    status: "Marked",
+    Marks: 38,
+  },
+  {
+    name: "English Quiz",
+    class: "Class B",
+    status: "Not Marked",
+    Marks: 28,
+  },
+  // {
+  //   name: "Geography Test",
+  //   class: "Class C",
+  //   status: "Marked",
+  //   Marks: 49,
+  // },
+  // {
+  //   name: "Physics Quiz",
+  //   class: "Class A",
+  //   status: "Marked",
+  //   Marks: 42,
+  // },
+  // {
+  //   name: "Chemistry Test",
+  //   class: "Class B",
+  //   status: "Not Marked",
+  //   Marks: 32,
+  // },
+  // {
+  //   name: "Biology Quiz",
+  //   class: "Class C",
+  //   status: "Marked",
+  //   Marks: 47,
+  // },
+  // {
+  //   name: "Literature Quiz",
+  //   class: "Class A",
+  //   status: "Marked",
+  //   Marks: 39,
   // },
 ];
