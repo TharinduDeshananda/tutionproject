@@ -1,4 +1,5 @@
 "use client";
+import AssignmentFilter from "@/components/AssignmentFilter";
 import PaginationComp from "@/components/PaginationComp";
 import { assignmentDetils } from "@/constants";
 import React, { useMemo } from "react";
@@ -8,6 +9,7 @@ function AssignmentPage() {
 
   return (
     <div className="w-full px-5 overflow-x-auto">
+      <AssignmentFilter />
       <PaginationComp currentPage={2} pageCount={10} />
       <table className="min-w-full divide-y divide-gray-200 shadow-md">
         <thead className="bg-gray-50">
