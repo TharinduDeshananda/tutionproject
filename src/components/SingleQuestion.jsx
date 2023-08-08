@@ -21,6 +21,7 @@ function SingleQuestion({
   onQuesionChange = () => {},
   onRemoveQuestion = () => {},
   questionId,
+  index,
 }) {
   const [haveChanges, setHaveChanges] = useState(false);
   const [showModal, setShowModal] = useState({ show: false, data: {} });
@@ -109,7 +110,7 @@ function SingleQuestion({
   return (
     <>
       <div className="relative grid w-full grid-cols-2 p-6 my-4 border border-gray-500 rounded-md ">
-        <span className="absolute text-sm left-1 top-1">{questionId})</span>
+        <span className="absolute text-sm left-1 top-1">{index + 1})</span>
         <FaRemoveFormat
           className="absolute right-0 top-[-20px] cursor-pointer hover:text-red-500 w-[20px] h-[20px]"
           onClick={() => {
