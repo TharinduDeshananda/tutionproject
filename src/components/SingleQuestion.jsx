@@ -1,36 +1,41 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AnswerAddModal from "./AnswerAddModal";
-import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
+import { FaPencilAlt, FaRemoveFormat, FaTrashAlt } from "react-icons/fa";
 
-const questionStateObj = {
-  question: "What is the name of current president?",
-  mutipleCorrect: false,
-  editing: true,
-  answers: [
-    { correct: true, text: "asnwer one" },
-    { correct: false, text: "asnwer two" },
-    { correct: false, text: "asnwer three" },
-    { correct: false, text: "asnwer four" },
-  ],
-};
+// const questionStateObj = {
+//   id: questionId,
+//   question: "What is the name of current president?",
+//   mutipleCorrect: false,
+//   anyCorrect: true,
+//   editing: true,
+//   answers: [
+//     { correct: true, text: "asnwer one", id: 1 },
+//     { correct: false, text: "asnwer two", id: 2 },
+//     { correct: false, text: "asnwer three", id: 3 },
+//     { correct: false, text: "asnwer four", id: 4 },
+//   ],
+// }
 
-function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
-  const [haveChanges, setHaveChanges] = useState(true);
+function SingleQuestion({
+  onQuesionChange = () => {},
+  onRemoveQuestion = () => {},
+  questionId,
+}) {
+  const [haveChanges, setHaveChanges] = useState(false);
   const [showModal, setShowModal] = useState({ show: false, data: {} });
   const [questionState, setQuestionState] = useState({
     id: questionId,
-    question: "What is the name of current president?",
+    question: "",
     mutipleCorrect: false,
-    anyCorrect: true,
-    editing: true,
-    answers: [
-      { correct: true, text: "asnwer one", id: 1 },
-      { correct: false, text: "asnwer two", id: 2 },
-      { correct: false, text: "asnwer three", id: 3 },
-      { correct: false, text: "asnwer four", id: 4 },
-    ],
+    anyCorrect: false,
+    editing: false,
+    answers: [],
   });
+
+  useEffect(() => {
+    setQuestionState((current) => ({ ...current, id: questionId }));
+  }, [questionId]);
 
   const getFieldNameForAnswer = (answerId) => {
     return `q${questionState.id}-${answerId}`;
@@ -75,7 +80,10 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
     setQuestionState((current) => {
       const answerId = answer?.id ?? 0;
       const maxCurrentId =
-        current.answers.sort(sortAnswersWithId)[current.answers.length - 1].id;
+        current.answers.length === 0
+          ? 0
+          : current.answers.sort(sortAnswersWithId)[current.answers.length - 1]
+              .id;
 
       if (answerId === 0) {
         return {
@@ -86,11 +94,7 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
         const existingAnswer = current.answers.find((a) => a.id === answer.id);
         if (!existingAnswer)
           throw new Error("Existing answer not found for id: ", answer.id);
-        if (answer.correct === true)
-          current.answers.forEach((c) => (c.correct = false));
-        if (answer.correct === false && existingAnswer.correct) {
-          current.anyCorrect = false;
-        }
+
         return {
           ...current,
           answers: [
@@ -104,20 +108,31 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
 
   return (
     <>
-      <div className=" grid w-full  p-5 my-4 border border-gray-500 rounded-md grid-cols-2">
+      <div className="relative grid w-full grid-cols-2 p-6 my-4 border border-gray-500 rounded-md ">
+        <span className="absolute text-sm left-1 top-1">{questionId})</span>
+        <FaRemoveFormat
+          className="absolute right-0 top-[-20px] cursor-pointer hover:text-red-500 w-[20px] h-[20px]"
+          onClick={() => {
+            onRemoveQuestion(questionId);
+          }}
+        />
         <textarea
           rows={3}
           defaultValue={questionState.question}
           placeholder="type your question here..."
-          onInput={() => {
+          onInput={(event) => {
             setHaveChanges(true);
+            setQuestionState((current) => ({
+              ...current,
+              text: event.target.value,
+            }));
           }}
-          className="col-span-2 p-2 mb-2 text-xs  md:text-sm lg:text-md focus:outline-blue-700 bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 "
+          className="col-span-2 p-2 mb-2 text-xs text-gray-900 border border-gray-300 rounded-lg md:text-sm lg:text-md focus:outline-blue-700 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 "
         />
         {questionState.answers.map((answer, index) => {
           return (
             <div
-              className="flex items-center mb-4 col-span-2 md:col-span-1 gap-1 sm:gap-2"
+              className="flex items-start col-span-2 gap-1 mb-4 md:col-span-1 sm:gap-2"
               key={answer.id}
             >
               <FaPencilAlt
@@ -151,7 +166,7 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
               />
               <label
                 htmlFor={getFieldNameForAnswer(answer.id)}
-                className="ml-2 text-sm font-medium text-gray-900 flex-1"
+                className="flex-1 ml-2 text-sm font-medium text-gray-900 break-words"
               >
                 {answer.id}){"  "}
                 {answer.text}
@@ -160,9 +175,9 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
           );
         })}
 
-        <div className="flex items-center justify-end col-span-2 w-full ">
+        <div className="flex items-center justify-end w-full col-span-2 ">
           <button
-            className="self-end px-5 py-2 text-xs rounded-md text-white bg-blue-700 cursor-pointer hover:bg-blue-600"
+            className="self-end px-5 py-2 text-xs text-white bg-blue-700 rounded-md cursor-pointer hover:bg-blue-600"
             onClick={() => {
               setShowModal({ show: true, data: {} });
             }}
@@ -173,9 +188,9 @@ function SingleQuestion({ onQuesionChange = () => {}, questionId }) {
 
         <div className="flex items-center justify-center col-span-2">
           <button
-            className="disabled:bg-gray-500 disabled:hover:bg-gray-500 disabled:cursor-default self-start px-5 py-2 text-white bg-blue-700 cursor-pointer hover:bg-blue-600 text-xs rounded-md"
+            className="self-start px-5 py-2 text-xs text-white bg-blue-700 rounded-md cursor-pointer disabled:bg-gray-500 disabled:hover:bg-gray-500 disabled:cursor-default hover:bg-blue-600"
             onClick={() => {
-              onQuesionChange();
+              onQuesionChange(questionState);
               setHaveChanges(false);
             }}
             disabled={!haveChanges}

@@ -1,8 +1,84 @@
+"use client";
+
 import SingleQuestion from "@/components/SingleQuestion";
 import { getDateTimeForInputFields } from "@/util/DateTimeUtil";
-import React from "react";
+import React, { useState } from "react";
+
+// const questionObj = {
+//   id: questionId,
+//   question: "",
+//   mutipleCorrect: false,
+//   anyCorrect: false,
+//   editing: false,
+//   answers: [],
+// };
 
 function QuizCreatePage() {
+  const [currentQuestions, setCurrentQuestions] = useState([]);
+
+  const removeQuestion = (questionId) => {
+    setCurrentQuestions((current) => {
+      console.log("before removing : ", current);
+      console.log("removing questionid: ", questionId);
+      const filteredList = current.filter((q) => q.id !== questionId);
+      console.log("after removing : ", filteredList);
+      for (let i = 0; i < filteredList.length; ++i) {
+        filteredList[i].id = i + 1;
+      }
+      filteredList.sort((a, b) => {
+        if (!a.id || !b.id)
+          throw new Error(
+            "Method QuizCreatePage.removeQuestion when sorting undefined ids found id1: ",
+            a.id,
+            " id2: ",
+            b.id
+          );
+        if (a.id < b.id) return -1;
+        if (a.id === b.id)
+          throw new Error(
+            "Method QuizCreatePage.removeQuestion two questions with same id found id: ",
+            a.id
+          );
+        else return +1;
+      });
+      console.log("final sorted list: ", filteredList);
+      return [...filteredList];
+    });
+  };
+
+  const addQuestion = () => {
+    if (currentQuestions.length === 20) return;
+    setCurrentQuestions((current) => {
+      return [...current, { id: current.length + 1 }];
+    });
+  };
+
+  const onQuestionUpdate = (question) => {
+    setCurrentQuestions((current) => {
+      if (!question.id)
+        throw new Error(
+          "method QuizCreatePage.onQuestionUpdate  : Question id not found"
+        );
+      const filteredList = current.filter((q) => q.id !== question.id);
+      return [...filteredList, question].sort((a, b) => {
+        if (!a.id || !b.id)
+          throw new Error(
+            "Method QuizCreatePage.removeQuestion when sorting undefined ids found id1: ",
+            a.id,
+            " id2: ",
+            b.id
+          );
+        if (a.id < b.id) return -1;
+        if (a.id === b.id)
+          throw new Error(
+            "Method QuizCreatePage.removeQuestion two questions with same id found id: ",
+            a.id
+          );
+        else return +1;
+      });
+    });
+  };
+
   return (
     <div className="w-full min-h-screen p-3 md:p-5">
       {/* quiz description creation part */}
@@ -134,14 +210,30 @@ function QuizCreatePage() {
 
       {/* quiz creation div start */}
       <div className="flex flex-col w-full bg-white min-h-[300px] rounded-md  p-3 md:p-5 my-5">
-        <h2 className="mb-5 text-xs md:text-sm md:text-md 2xl:text-lg">
+        <h2 className="text-xs md:text-sm md:text-md 2xl:text-lg">
           Create Questions here.
         </h2>
-        <button className="self-start px-5 py-3 text-white bg-blue-700 cursor-pointer hover:bg-blue-600">
+        <h5 className="mb-5 text-xs">
+          Maximum of 20 questions.{" "}
+          <span className="text-blue-600">{currentQuestions.length}/20</span> of
+          questions created.
+        </h5>
+        <button
+          className="self-start px-5 py-3 text-white bg-blue-700 cursor-pointer disabled:bg-gray-500 disabled:hover:bg-gray-500 disabled:cursor-default hover:bg-blue-600"
+          onClick={addQuestion}
+          disabled={currentQuestions.length === 20}
+        >
           Add Question
         </button>
 
-        <SingleQuestion />
+        {currentQuestions.map((i, index) => (
+          <SingleQuestion
+            key={i.id}
+            onRemoveQuestion={removeQuestion}
+            onQuesionChange={onQuestionUpdate}
+            questionId={i.id}
+          />
+        ))}
       </div>
       {/* quiz creation div end */}
     </div>
