@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import Image from "next/image";
 import Avatar from "./Avatar";
+import Link from "next/link";
 
 function SideBar() {
   return (
@@ -20,16 +21,22 @@ function SideBar() {
           <Image alt="" src={"/atom.png"} fill />
         </div>
       </div>
+      <Link href={"/dashboard"} className="w-full">
+        <SideBarItem title="Home">
+          <FaHome />
+        </SideBarItem>
+      </Link>
+      <Link href={"/dashboard/classrooms/studentclassrooms"} className="w-full">
+        <SideBarItem title="Classes">
+          <FaGraduationCap />
+        </SideBarItem>
+      </Link>
+      <Link href={"/dashboard/teacher"} className="w-full">
+        <SideBarItem title="Teachers">
+          <FaUsers />
+        </SideBarItem>
+      </Link>
 
-      <SideBarItem title="Home">
-        <FaHome />
-      </SideBarItem>
-      <SideBarItem title="Classes">
-        <FaGraduationCap />
-      </SideBarItem>
-      <SideBarItem title="Teachers">
-        <FaUsers />
-      </SideBarItem>
       <SideBarItem title="Assignments">
         <FaBook />
       </SideBarItem>
