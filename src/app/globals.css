@@ -47,3 +47,22 @@
     column-gap: 5px;
   }
 }
+@layer utilities {
+  .generic-padding-x {
+    @apply px-1 sm:px-2 md:px-5;
+  }
+
+  .generic-padding-y {
+    @apply py-1 sm:py-2;
+  }
+
+  .generic-text {
+    @apply text-xs sm:text-sm;
+  }
+}
+
+@layer components {
+  .generic-button-primary {
+    @apply px-5 py-2 text-white bg-blue-700 generic-text;
+  }
+}

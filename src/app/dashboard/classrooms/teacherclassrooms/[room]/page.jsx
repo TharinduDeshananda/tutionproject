@@ -2,6 +2,7 @@ import PaginationComp from "@/components/PaginationComp";
 import ClassRoomResourceCard from "@/components/ClassRoomResourceCard";
 import React, { useMemo } from "react";
 import CustomModal from "@/components/modalcomp/CustomModal";
+import Link from "next/link";
 
 function TeacherClassRoom({ searchParams }) {
   const showResourceAddModal = searchParams?.resourceadd;
@@ -9,6 +10,22 @@ function TeacherClassRoom({ searchParams }) {
   return (
     <>
       <div className="flex flex-col w-full">
+        {/* class room utilities */}
+        <div className="sticky top-0 min-h-[54px] flex items-center justify-end bg-white py-2 px-1 shadow-md gap-1">
+          <Link href={"?resourceadd=true"}>
+            <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+              Add Resource
+            </button>
+          </Link>
+          <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+            Send Notice
+          </button>
+
+          <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+            Students
+          </button>
+        </div>
+
         {/* class description */}
         <div className="flex flex-col items-center justify-center p-1 mx-1 my-1 bg-white rounded-md shadow-lg md:mx-5 md:my-5 sm:p-5">
           <h1 className="text-lg md:text-3xl">Mathematics</h1>
@@ -24,15 +41,10 @@ function TeacherClassRoom({ searchParams }) {
             preferences.
           </p>
         </div>
-
         {/* class resources */}
         <h1 className="px-1 text-sm sm:px-5 sm:text-lg">Resources</h1>
         <PaginationComp currentPage={5} pageCount={10} />
-
         <div className="flex flex-col gap-5">
-          <button className="self-center px-5 py-2 text-xs text-white bg-blue-700 rounded-md cursor-pointer hover:bg-blue-500">
-            Add Resource
-          </button>
           <ClassRoomResourceCard />
           <ClassRoomResourceCard />
           <ClassRoomResourceCard />
@@ -83,6 +95,13 @@ function TeacherClassRoom({ searchParams }) {
                   multiple
                 />
               </label>
+            </div>
+            <div className="flex justify-around w-full px-1 my-2 sm:px-2 md:px-5">
+              <Link href={"?"}>
+                <button className="generic-button-primary">Cancel</button>
+              </Link>
+
+              <button className="generic-button-primary">Apply</button>
             </div>
           </form>
         </CustomModal>

@@ -1,6 +1,25 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import Image from "next/image";
 
-function page() {
+function CreateUserPage() {
+  const [userImageUrl, setUserImageUrl] = useState(null);
+
+  /**
+   *
+   * @param {React.ChangeEvent} e
+   */
+  function onSelectUserImage(e) {
+    try {
+      const file = e.target.files[0];
+      const tempUrl = URL.createObjectURL(file);
+      setUserImageUrl(tempUrl);
+      console.log(file);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   // top container
   return (
     <div className="w-full min-h-[100vh] bg-orange-200 flex justify-center items-center flex-col overflow-auto">
@@ -60,28 +79,7 @@ function page() {
           />
         </div>
         {/* address ends */}
-        {/* current grade start */}
-        <div className="">
-          <label
-            htmlFor="grade"
-            className="block text-sm font-medium text-gray-900 "
-          >
-            Select your current grade
-          </label>
-          <select
-            defaultValue={"g11"}
-            id="grade"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-          >
-            <option value="g11">Grade 11</option>
-            <option value="g10">Grade 10</option>
-            <option value="g9">Grade 9</option>
-            <option value="g8">Grade 8</option>
-            <option value="g7">Grade 7</option>
-            <option value="g6">Grade 6</option>
-          </select>
-        </div>
-        {/* current grade ends */}
+
         {/* email address start */}
         <div className="col-start-1">
           <label
@@ -116,8 +114,43 @@ function page() {
           />
         </div>
         {/* password end */}
+        {/* retype password start */}
+        <div className="col-start-1">
+          <label
+            htmlFor="password"
+            className="block mb-0 text-sm font-medium text-gray-900"
+          >
+            Retype password
+          </label>
+          <input
+            type="password"
+            id="repassword"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   "
+            placeholder="retype password"
+            required
+          />
+        </div>
+        {/* retype password end */}
         {/* user image box */}
-        <div className="col-start-1 bg-blue-500 min-h-[200px] border rounded-md md:col-start-2 md:row-start-4 md:row-span-3"></div>
+        <label
+          htmlFor="userImage"
+          className="relative col-start-1 bg-blue-50 min-h-[200px] border rounded-md md:col-start-2 md:row-start-4 md:row-span-3"
+        >
+          <Image
+            src={userImageUrl ?? "/placeholder-image.png"}
+            fill
+            className="object-cover"
+            alt="user profile image"
+          />
+          <input
+            type="file"
+            className="hidden"
+            id="userImage"
+            name="userImage"
+            accept="image/png, image/gif, image/jpeg"
+            onChange={onSelectUserImage}
+          />
+        </label>
 
         {/* user image box end */}
 
@@ -137,4 +170,4 @@ function page() {
   );
 }
 
-export default page;
+export default CreateUserPage;
