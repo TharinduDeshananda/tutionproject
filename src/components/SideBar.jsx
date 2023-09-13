@@ -43,9 +43,12 @@ function SideBar() {
       <SideBarItem title="Quizes">
         <FaQuestionCircle />
       </SideBarItem>
-      <SideBarItem title="Notices">
-        <FaEnvelope />
-      </SideBarItem>
+      <Link href={"/dashboard/notice"} className="w-full">
+        <SideBarItem title="Notices">
+          <FaEnvelope />
+        </SideBarItem>
+      </Link>
+
       <SideBarItem title="Messages">
         <FaComment />
       </SideBarItem>
