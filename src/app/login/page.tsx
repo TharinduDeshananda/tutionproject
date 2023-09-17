@@ -5,7 +5,7 @@ import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 const initialValues = {
-  userName: "",
+  username: "",
   password: "",
 };
 
@@ -14,7 +14,11 @@ function LoginPage() {
     initialValues: initialValues,
     onSubmit: (values) => {
       console.log(values);
-      signIn("credentials", { callbackUrl: "/" }, { ...values });
+      signIn(
+        "credentials",
+
+        { ...values, callbackUrl: "/" }
+      );
     },
   });
 
@@ -45,18 +49,18 @@ function LoginPage() {
             <div className="flex flex-col items-center w-full">
               <div>
                 <label
-                  htmlFor="first_name"
+                  htmlFor="username"
                   className="block mb-0 text-sm font-medium text-gray-900"
                 >
                   User name
                 </label>
                 <input
                   type="email"
-                  id="userName"
-                  name="userName"
+                  id="username"
+                  name="username"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  value={formik.values.userName}
+                  value={formik.values.username}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   "
                   placeholder="email address"
                   required

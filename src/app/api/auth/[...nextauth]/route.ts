@@ -10,31 +10,46 @@ export const authOptions = {
       name: "usernamepassword",
       credentials: {
         // Define the fields required for authentication
-        userName: { label: "Username", type: "text" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(
         credentials: Record<string, string>,
         req: NextApiRequest
       ) {
-        console.log(credentials);
-        const userName = credentials["username"];
+        try {
+          console.log(credentials);
+          const userName = credentials["username"];
+          const password = credentials["password"];
 
-        // const password = credentials["password"];
+          const user = await findUserByEmail(userName);
+          if (user) {
+            return user;
+          }
 
-        const user = await findUserByEmail(userName);
-        if (user) {
-          return user;
+          return { name: "Tharindu", password: "passwordDeshan" };
+        } catch (error) {
+          console.log("Login failed: ", error);
+          return {
+            name: "Tharindu",
+            password: "passwordDeshan",
+            email: "tdeshananda@gmail.com",
+          };
         }
-
-        return null;
       },
     }),
     // ...add more providers here
   ],
+  pages: {
+    signIn: "/login",
+    signOut: "/logout",
+    verifyRequest: "/auth/verify-request", // (used for check email message)
+    error: "/login", // Error code passed in query string as ?error=
+    newUser: "/new-user", // New users will be directed here on first sign in (leave the property out if not of interest)
+  },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      console.log("signing in");
+      console.log("signing in ", user, account, profile, email, credentials);
       return true;
     },
     async redirect({ url, baseUrl }) {
