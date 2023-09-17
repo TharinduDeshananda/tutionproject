@@ -1,6 +1,5 @@
-import ClassCard from "../components/ClassCard";
-import PaginationComp from "../components/PaginationComp";
-import { classRooms } from "../constants";
+import PaginationComp from "@/components/PaginationComp";
+import { classRooms } from "@/constants";
 import React, { useMemo } from "react";
 
 function TeacherClassRooms() {

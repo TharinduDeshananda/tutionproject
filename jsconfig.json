@@ -2,13 +2,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@/components/*": ["src/components/*"],
-      "@/constants": ["src/constants"],
-      "../components/*": ["src/components/*"],
-      "../constants": ["src/constants"],
-      "@/util/*": ["src/util/*"],
-      "@/wrappers/*": ["src/wrappers/*"],
-      "../wrappers": ["src/wrappers"],
+      
+      
     }
   }
 }

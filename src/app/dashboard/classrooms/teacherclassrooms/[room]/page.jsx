@@ -1,7 +1,7 @@
-import PaginationComp from "../components/PaginationComp";
-import ClassRoomResourceCard from "../components/ClassRoomResourceCard";
+import PaginationComp from "@/components/PaginationComp";
+import ClassRoomResourceCard from "@/components/ClassRoomResourceCard";
 import React, { useMemo } from "react";
-import CustomModal from "../components/modalcomp/CustomModal";
+import CustomModal from "@/components/modalcomp/CustomModal";
 import Link from "next/link";
 
 function TeacherClassRoom({ searchParams }) {
