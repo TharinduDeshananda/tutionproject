@@ -1,7 +1,13 @@
 import SideBar from "@/components/SideBar";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import React from "react";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 
-function DashboardLayout({ children }) {
+async function DashboardLayout({ children }) {
+  const serverSession = await getServerSession(authOptions);
+  console.log(serverSession);
+  if (!serverSession) redirect("/login", "replace");
   return (
     <div className="w-full min-h-[100vh] flex flex-row max-w-[100vw]">
       <SideBar />

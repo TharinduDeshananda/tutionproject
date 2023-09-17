@@ -4,10 +4,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { findUserByEmail } from "src/services/UserService";
 
 export const authOptions = {
+  secret: "BmrfbNplpy1ErIMLGEbz7Lb14dxYowVWP5q8CXpySFc=",
   // Configure one or more authentication providers
   providers: [
     CredentialsProvider({
       name: "usernamepassword",
+
       credentials: {
         // Define the fields required for authentication
         username: { label: "Username", type: "text" },
