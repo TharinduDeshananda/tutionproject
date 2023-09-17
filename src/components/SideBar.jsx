@@ -49,10 +49,6 @@ function SideBar() {
         </SideBarItem>
       </Link>
 
-      <SideBarItem title="Messages">
-        <FaComment />
-      </SideBarItem>
-
       <div className="w-full mt-auto mb-2">
         <Avatar />
       </div>

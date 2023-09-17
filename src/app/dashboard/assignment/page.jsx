@@ -1,7 +1,7 @@
 "use client";
-import AssignmentFilter from "@/components/AssignmentFilter";
-import PaginationComp from "@/components/PaginationComp";
-import { assignmentDetils } from "@/constants";
+import AssignmentFilter from "../components/AssignmentFilter";
+import PaginationComp from "../components/PaginationComp";
+import { assignmentDetils } from "../constants";
 import React, { useMemo } from "react";
 
 function AssignmentPage() {
