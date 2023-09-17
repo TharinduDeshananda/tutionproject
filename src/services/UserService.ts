@@ -38,7 +38,6 @@ export async function findUserByEmail(email: String) {
   try {
     console.log("method findUserByEmail start");
     const user = await db.UserEntity.findOne({ email: email });
-
     if (!user) throw new Error("User not found");
     return user;
   } catch (e) {
