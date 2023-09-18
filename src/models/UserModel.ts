@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema<UserDto>(
     imgUrl: String,
     mobile: String,
     password: String,
-    role: { type: String, enum: UserRole, default: UserRole.USER },
+    role: { type: String, enum: UserRole, default: UserRole.STUDENT },
   },
   { timestamps: true }
 );
