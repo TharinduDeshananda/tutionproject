@@ -2,7 +2,7 @@
 import { getSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-
+import { signOut } from "next-auth/react";
 function Avatar() {
   const [userName, setUserName] = useState("");
   async function setInitState() {
@@ -21,6 +21,9 @@ function Avatar() {
       </div>
       <div>
         <h2 className="text-xs">{userName}</h2>
+        <button className="generic-button-primary" onClick={() => signOut()}>
+          Sign Out
+        </button>
       </div>
     </div>
   );

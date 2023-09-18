@@ -24,7 +24,8 @@ export async function updateUser(userDto: UserDto) {
     if (userDto.imgUrl) updateUser.set("imgUrl", userDto.imgUrl);
     if (userDto.password) updateUser.set("password", userDto.password);
     if (userDto.mobile) updateUser.set("mobile", userDto.mobile);
-    if (userDto.name) updateUser.set("name", userDto.name);
+    if (userDto.firstName) updateUser.set("firstName", userDto.firstName);
+    if (userDto.lastName) updateUser.set("lastName", userDto.lastName);
     await updateUser.save();
     return updateUser;
   } catch (error) {

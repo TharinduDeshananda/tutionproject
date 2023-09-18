@@ -4,6 +4,7 @@ import Image from "next/image";
 import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 const initialValues = {
   username: "",
   password: "",
@@ -115,12 +116,14 @@ function LoginPage() {
               <h1 className="text-xs text-center sm:hidden">
                 If you dont have an account create one
               </h1>
-              <button
-                type="button"
-                className=" text-xs mt-5 focus:outline-none text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg  px-5 py-2.5 mr-2 mb-2 "
-              >
-                Create account
-              </button>
+              <Link href={"/account/createaccount"}>
+                <button
+                  type="button"
+                  className=" text-xs mt-5 focus:outline-none text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg  px-5 py-2.5 mr-2 mb-2 "
+                >
+                  Create account
+                </button>
+              </Link>
             </div>
           </div>
         </div>

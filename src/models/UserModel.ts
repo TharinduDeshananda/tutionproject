@@ -4,7 +4,8 @@ import UserRole from "src/enum/UserRole";
 
 const userSchema = new mongoose.Schema<UserDto>(
   {
-    name: { type: String, required: true },
+    firstName: String,
+    lastName: String,
     email: { type: String, required: true, unique: true },
     imgUrl: String,
     mobile: String,

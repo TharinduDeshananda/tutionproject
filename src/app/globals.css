@@ -59,6 +59,10 @@
   .generic-text {
     @apply text-xs sm:text-sm;
   }
+
+  .generic-heading {
+    @apply text-2xl font-bold;
+  }
 }
 
 @layer components {
