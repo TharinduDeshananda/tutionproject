@@ -15,13 +15,16 @@ function Avatar() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full mx-auto border border-transparent rounded-lg hover:border-blue-500">
+    <div className="flex flex-col items-center justify-center w-full mx-auto border border-transparent rounded-lg ">
       <div className="w-[60px] h-[60px] relative cursor-pointer">
         <Image alt="" src={"/man.png"} fill />
       </div>
-      <div>
-        <h2 className="text-xs">{userName}</h2>
-        <button className="generic-button-primary" onClick={() => signOut()}>
+      <div className="flex flex-col items-center justify-center">
+        <h2 className="text-xs text-center">{userName}</h2>
+        <button
+          className="self-center rounded-md generic-button-primary hover:bg-green-600"
+          onClick={() => signOut()}
+        >
           Sign Out
         </button>
       </div>

@@ -1,6 +1,8 @@
+import { error } from "console";
 import { NextApiRequest } from "next";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import UserDto from "src/models/dto/UserDto";
 import { verifyPassword } from "src/services/AuthServices";
 import { findUserByEmail } from "src/services/UserService";
 
@@ -24,13 +26,19 @@ export const authOptions = {
           console.log(credentials);
           const userName = credentials["username"];
           const password = credentials["password"];
-
-          const user = await findUserByEmail(userName);
-          if (user && verifyPassword(password, user.password)) {
-            return user;
+          console.log("testing password ", password);
+          const user: UserDto = await findUserByEmail(userName);
+          console.log("method usernamepassword ", user);
+          if (user && (await verifyPassword(password, user.password))) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.firstName + " " + user.lastName,
+              image: "",
+            };
           }
 
-          return null;
+          throw new Error("User name or password not match");
         } catch (error) {
           console.log("Login failed: ", error);
           throw error;

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useFormik } from "formik";
+import { redirect } from "next/navigation";
 
 const initialValues = {
   firstName: "",
@@ -33,7 +34,7 @@ function CreateUserPage() {
         method: "POST",
         body: formData,
       });
-      console.log(response);
+      if (response.ok) redirect("/login");
     },
   });
 
@@ -153,6 +154,27 @@ function CreateUserPage() {
             />
           </div>
           {/* email address end */}
+          {/* mobile start */}
+          <div className="col-start-1">
+            <label
+              htmlFor="mobile"
+              className="block mb-0 text-sm font-medium text-gray-900"
+            >
+              Mobile Number
+            </label>
+            <input
+              type="text"
+              id="mobile"
+              name="mobile"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.mobile}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   "
+              placeholder="Mobile number"
+              required
+            />
+          </div>
+          {/* mobile end */}
           {/* user role start */}
           <div className="col-start-1">
             <label
