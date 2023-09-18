@@ -1,6 +1,7 @@
 import { NextApiRequest } from "next";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { verifyPassword } from "src/services/AuthServices";
 import { findUserByEmail } from "src/services/UserService";
 
 export const authOptions = {
@@ -25,18 +26,14 @@ export const authOptions = {
           const password = credentials["password"];
 
           const user = await findUserByEmail(userName);
-          if (user) {
+          if (user && verifyPassword(password, user.password)) {
             return user;
           }
 
-          return { name: "Tharindu", password: "passwordDeshan" };
+          return null;
         } catch (error) {
           console.log("Login failed: ", error);
-          return {
-            name: "Tharindu",
-            password: "passwordDeshan",
-            email: "tdeshananda@gmail.com",
-          };
+          throw error;
         }
       },
     }),

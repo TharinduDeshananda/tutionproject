@@ -5,12 +5,15 @@ import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 const initialValues = {
   username: "",
   password: "",
 };
 
 function LoginPage() {
+  const errorNavigation = useSearchParams().get("error");
+
   const formik = useFormik({
     initialValues: initialValues,
     onSubmit: (values) => {
@@ -86,7 +89,11 @@ function LoginPage() {
                   required
                 />
               </div>
-
+              {errorNavigation && (
+                <div className="text-xs text-red-600">
+                  Email or password not match
+                </div>
+              )}
               <input
                 value={"Login"}
                 type="submit"

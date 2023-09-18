@@ -2,10 +2,16 @@ import { error } from "console";
 import { Document } from "mongoose";
 import { db } from "src/helpers/db";
 import UserDto from "src/models/dto/UserDto";
+import { hashPassword } from "./AuthServices";
 
 export async function createUser(userDto: UserDto) {
   try {
     console.log("method createUser start");
+
+    if (userDto.password) {
+      userDto.password = await hashPassword(userDto.password);
+    }
+
     const createdUser = await db.UserEntity.create({ ...userDto });
     return createdUser;
   } catch (error) {
@@ -22,7 +28,8 @@ export async function updateUser(userDto: UserDto) {
     if (!updateUser) throw new Error("User not found");
 
     if (userDto.imgUrl) updateUser.set("imgUrl", userDto.imgUrl);
-    if (userDto.password) updateUser.set("password", userDto.password);
+    if (userDto.password)
+      updateUser.set("password", await hashPassword(userDto.password));
     if (userDto.mobile) updateUser.set("mobile", userDto.mobile);
     if (userDto.firstName) updateUser.set("firstName", userDto.firstName);
     if (userDto.lastName) updateUser.set("lastName", userDto.lastName);

@@ -1,7 +1,8 @@
-import { plainToInstance } from "class-transformer";
 import { NextRequest, NextResponse } from "next/server";
 import UserRole from "src/enum/UserRole";
 import UserDto from "src/models/dto/UserDto";
+
+import { createUser } from "src/services/UserService";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,9 +17,7 @@ export async function POST(request: NextRequest) {
     dto.password = body.get("password") as string;
     dto.role = body.get("role") as UserRole;
 
-    const userImageFile = body.get("userImg");
-
-    console.log(dto);
+    await createUser(dto);
     return NextResponse.json({ status: 0, message: "OK" });
   } catch (error) {
     console.log(error);
