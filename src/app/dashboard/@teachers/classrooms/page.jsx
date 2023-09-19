@@ -1,5 +1,6 @@
 import PaginationComp from "@/components/PaginationComp";
 import { classRooms } from "@/constants";
+import Link from "next/link";
 import React, { useMemo } from "react";
 
 function TeacherClassRooms() {
@@ -11,6 +12,15 @@ function TeacherClassRooms() {
       <h2 className="text-sm font-bold text-gray-500 shadow-none md:text-2xl">
         Your classes
       </h2>
+
+      <div className="w-full p-1 sm:p-2 md:p-5">
+        <Link href={"/dashboard/classrooms/create-classroom"}>
+          <button className="bg-green-600 generic-button-primary hover:bg-green-700">
+            Create new Class
+          </button>
+        </Link>
+      </div>
+
       {/* pagination component */}
       <PaginationComp currentPage={2} pageCount={12} />
       {/* data table */}

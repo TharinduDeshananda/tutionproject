@@ -26,7 +26,7 @@ function SideBar() {
           <FaHome />
         </SideBarItem>
       </Link>
-      <Link href={"/dashboard/classrooms/studentclassrooms"} className="w-full">
+      <Link href={"/dashboard/classrooms"} className="w-full">
         <SideBarItem title="Classes">
           <FaGraduationCap />
         </SideBarItem>
