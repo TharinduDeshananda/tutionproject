@@ -21,6 +21,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 0, message: "OK" });
   } catch (error) {
     console.log(error);
-    NextResponse.json({ status: 1, message: "Failed" });
+    return NextResponse.json({ status: 1, message: "Failed" });
   }
 }

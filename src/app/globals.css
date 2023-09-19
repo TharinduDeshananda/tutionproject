@@ -63,6 +63,9 @@
   .generic-heading {
     @apply text-2xl font-bold;
   }
+  .generic-padding {
+    @apply p-1 sm:p-2 md:p-5;
+  }
 }
 
 @layer components {

@@ -1,18 +1,17 @@
 "use client";
 import React, { memo } from "react";
 
-const CustomInputField = ({
-  type = "text",
+const CustomTextArea = ({
+  cols = 3,
   placeholder = "",
   onChangeHandle = () => {},
   onInputHandle = () => {},
   inputName = "",
   value = "",
-  defaultValue = "",
 }) => {
   return (
-    <input
-      type={type}
+    <textarea
+      cols={cols}
       name={inputName}
       id={inputName}
       value={value}
@@ -24,4 +23,4 @@ const CustomInputField = ({
   );
 };
 
-export default memo(CustomInputField);
+export default memo(CustomTextArea);
