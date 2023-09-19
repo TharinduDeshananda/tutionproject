@@ -4,10 +4,11 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 function Avatar() {
-  const [userName, setUserName] = useState("");
+  const [user, setUser] = useState("");
+
   async function setInitState() {
     const session = await getSession();
-    setUserName(session?.user?.name ?? "");
+    setUser(session?.user);
   }
 
   useEffect(() => {
@@ -20,7 +21,8 @@ function Avatar() {
         <Image alt="" src={"/man.png"} fill />
       </div>
       <div className="flex flex-col items-center justify-center">
-        <h2 className="text-xs text-center">{userName}</h2>
+        <h2 className="text-xs text-center">{user?.name}</h2>
+        <h2 className="text-xs text-center">{user?.role}</h2>
         <button
           className="self-center rounded-md generic-button-primary hover:bg-green-600"
           onClick={() => signOut()}

@@ -26,15 +26,16 @@ export const authOptions = {
           console.log(credentials);
           const userName = credentials["username"];
           const password = credentials["password"];
-          console.log("testing password ", password);
+
           const user: UserDto = await findUserByEmail(userName);
-          console.log("method usernamepassword ", user);
+
           if (user && (await verifyPassword(password, user.password))) {
             return {
-              id: user.id,
               email: user.email,
               name: user.firstName + " " + user.lastName,
               image: "",
+              role: user.role,
+              id: user.id,
             };
           }
 
@@ -56,16 +57,22 @@ export const authOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      console.log("signing in ", user, account, profile, email, credentials);
       return true;
     },
     async redirect({ url, baseUrl }) {
       return baseUrl;
     },
     async session({ session, token, user }) {
+      if (token) {
+        if (token.role) session.user.role = token.role;
+        if (token.id) session.user.id = token.id;
+      }
       return session;
     },
     async jwt({ token, user, account, profile, isNewUser }) {
+      if (user && user.role) token.role = user.role;
+      if (user && user.id) token.id = user.id;
+
       return token;
     },
   },
