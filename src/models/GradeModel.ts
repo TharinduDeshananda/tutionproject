@@ -11,6 +11,6 @@ const gradeSchema = new Schema<GradeDto>(
 
 export function getGradeModel() {
   return (
-    mongoose.models.grade || mongoose.model<GradeDto>("Grade", gradeSchema)
+    mongoose.models.Grade || mongoose.model<GradeDto>("Grade", gradeSchema)
   );
 }
