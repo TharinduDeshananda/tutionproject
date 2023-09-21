@@ -93,3 +93,18 @@ export async function removeClassRoom(id: string) {
     throw error;
   }
 }
+
+export async function getClassRoomById(id: string): Promise<ClassRoomDto> {
+  try {
+    console.log("method getClassRoomById start: ", id);
+    const room = await db.ClassRoomEntity.findById(id)
+      .populate("grade")
+      .populate("subject")
+      .populate("teacher");
+    if (!room) throw new Error("Class room not found");
+    return room;
+  } catch (error) {
+    console.log("method getClassRoomById failed: ", error);
+    throw error;
+  }
+}

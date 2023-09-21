@@ -9,6 +9,7 @@ import { SelectType } from "@/components/CustomSelectField";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 export type FormType = {
   className?: string;
@@ -51,6 +52,7 @@ function CreateRoomPage() {
       if (body.status) {
         throw new Error("Class creation failed: " + body.message);
       }
+      return body.body;
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -113,9 +115,11 @@ function CreateRoomPage() {
             <div className="col-span-1 sm:col-span-2 md:col-span-3 flex justify-center items-center gap-x-2">
               <div className="text-xs text-green-500 border border-green-500 p-5 rounded-md">
                 Your class created success.{" "}
-                <span className="underline cursor-pointer font-bold">
-                  Go to class
-                </span>
+                <Link href={`/dashboard/classrooms/${formMutation.data._id}`}>
+                  <span className="underline cursor-pointer font-bold">
+                    Go to class
+                  </span>
+                </Link>
               </div>
             </div>
           )}

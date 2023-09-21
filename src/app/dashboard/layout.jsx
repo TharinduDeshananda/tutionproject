@@ -11,7 +11,6 @@ async function DashboardLayout(props) {
 
   const userRole = serverSession.user.role;
   if (!userRole) throw new Error("Invalid access");
-  console.log(userRole);
 
   return (
     <div className="w-full min-h-[100vh] flex flex-row max-w-[100vw]">

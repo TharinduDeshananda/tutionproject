@@ -3,9 +3,31 @@ import ClassRoomResourceCard from "@/components/ClassRoomResourceCard";
 import React, { useMemo } from "react";
 import CustomModal from "@/components/modalcomp/CustomModal";
 import Link from "next/link";
+import { getClassRoomById } from "src/services/ClassRoomService";
+import ClassRoomDto from "src/models/dto/ClassRoomDto";
+import { redirect } from "next/navigation";
 
-function TeacherClassRoom({ searchParams }) {
+async function TeacherClassRoom({ searchParams, params }) {
   const showResourceAddModal = searchParams?.resourceadd;
+  const page = searchParams?.page;
+  const size = searchParams?.size;
+  const id = params.room;
+  let classRoom: ClassRoomDto;
+  try {
+    classRoom = await getClassRoomById(id);
+  } catch (e) {
+    console.log(e);
+    return (
+      <div className="w-full min-h-[500px] flex justify-center items-center flex-col">
+        <h1 className="text-2xl font-bold">Class Room Not found</h1>
+        <Link href={"/dashboard/classrooms"}>
+          <button className="cursor-pointer generic-button-primary hover:bg-blue-500">
+            Back to Class Rooms
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -28,17 +50,15 @@ function TeacherClassRoom({ searchParams }) {
 
         {/* class description */}
         <div className="flex flex-col items-center justify-center p-1 mx-1 my-1 bg-white rounded-md shadow-lg md:mx-5 md:my-5 sm:p-5">
-          <h1 className="text-lg md:text-3xl">Mathematics</h1>
-          <h2>Grade 10</h2>
-          <h2>Year 2023</h2>
-          <h2>Tharindu Deshananda</h2>
+          <h1 className="text-lg md:text-3xl">{classRoom.className}</h1>
+          <h1 className="text-lg md:text-3xl">{classRoom.classCode}</h1>
+          <h2>{classRoom.grade?.gradeName}</h2>
+          <h2>Year {classRoom.year}</h2>
+          <h2>
+            {classRoom.teacher?.firstName + " " + classRoom.teacher?.lastName}
+          </h2>
           <p className="p-2 text-xs text-justify md:text-sm">
-            Now, the ClassCard component will also display a short description
-            below the class information. Adjust the styling and content as
-            needed to match your design preferences.Now, the ClassCard component
-            will also display a short description below the class information.
-            Adjust the styling and content as needed to match your design
-            preferences.
+            {classRoom.description}
           </p>
         </div>
         {/* class resources */}
@@ -61,7 +81,7 @@ function TeacherClassRoom({ searchParams }) {
             </div>
             <div className="flex items-center justify-center w-full">
               <label
-                for="dropzone-file"
+                htmlFor="dropzone-file"
                 className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 "
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
