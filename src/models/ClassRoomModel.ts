@@ -4,7 +4,7 @@ import ClassRoomDto from "./dto/ClassRoomDto";
 const classRoomSchema = new Schema<ClassRoomDto>(
   {
     classCode: { type: String, required: true, unique: true },
-    classname: { type: String, required: true, unique: false },
+    className: { type: String, required: true, unique: false },
     description: String,
     grade: { type: mongoose.Types.ObjectId, ref: "Grade" },
     subject: { type: mongoose.Types.ObjectId, ref: "Subject" },

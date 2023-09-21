@@ -12,6 +12,7 @@ type PropType = {
   inputName?: string;
   value?: string;
   options?: SelectType[];
+  required?: boolean;
 };
 
 function CustomSelectField({
@@ -21,6 +22,7 @@ function CustomSelectField({
   inputName = "",
   value = "",
   options = [],
+  required = false,
 }: PropType) {
   return (
     <select
@@ -29,6 +31,7 @@ function CustomSelectField({
       value={value}
       onChange={onChangeHandle}
       placeholder={placeholder}
+      required={required}
       className="sm:text-sm text-xs outline-none bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
     >
       {options.map((i, index) => (

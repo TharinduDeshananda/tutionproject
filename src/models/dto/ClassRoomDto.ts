@@ -4,7 +4,7 @@ import UserDto from "./UserDto";
 
 export default class ClassRoomDto {
   public id?: string;
-  public classname?: string;
+  public className?: string;
   public classCode?: string;
   public grade?: GradeDto;
   public subject?: SubjectDto;

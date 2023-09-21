@@ -6,8 +6,9 @@ import CustomSelectField from "@/components/CustomSelectField";
 import SubjectDto from "src/models/dto/SubjectDto";
 import GradeDto from "src/models/dto/GradeDto";
 import { SelectType } from "@/components/CustomSelectField";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFormik } from "formik";
+import { toast } from "react-toastify";
 
 export type FormType = {
   className?: string;
@@ -32,8 +33,30 @@ const initValues: FormType = {
 function CreateRoomPage() {
   const formik = useFormik<FormType>({
     initialValues: initValues,
-    onSubmit: (values) => {
+    onSubmit: (values: FormType) => {
       console.log(values);
+      formMutation.mutate(values);
+    },
+  });
+
+  const formMutation = useMutation({
+    mutationFn: async (formValues: FormType) => {
+      const response = await fetch("/api/classroom", {
+        method: "POST",
+        body: JSON.stringify(formValues),
+      });
+
+      const body = await response.json();
+      console.log(body);
+      if (body.status) {
+        throw new Error("Class creation failed: " + body.message);
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Class creation success");
     },
   });
 
@@ -42,7 +65,9 @@ function CreateRoomPage() {
     queryFn: async ({ queryKey }) => {
       const response = await fetch("/api/grade", { method: "GET" });
       const body = await response.json();
+      if (body.status !== 0) throw new Error("Grades fetch failed");
       const data = body.body;
+      formik.setFieldValue("grade", data[0].gradeCode);
       return data;
     },
   });
@@ -52,7 +77,9 @@ function CreateRoomPage() {
     queryFn: async ({ queryKey }) => {
       const response = await fetch("/api/subject", { method: "GET" });
       const body = await response.json();
+      if (body.status !== 0) throw new Error("Subject fetch failed");
       const data = body.body;
+      formik.setFieldValue("subject", data[0].subjectCode);
       return data;
     },
   });
@@ -64,16 +91,31 @@ function CreateRoomPage() {
           <h1 className="col-span-1 mb-5 text-base font-bold sm:col-span-2 md:col-span-3 sm:text-lg md:text-xl">
             Enter Class Details
           </h1>
-          {(gradeQuery.isLoading || subjectQuery.isLoading) && (
+          {(gradeQuery.isLoading ||
+            subjectQuery.isLoading ||
+            formMutation.isLoading) && (
             <div className="col-span-1 sm:col-span-2 md:col-span-3 flex justify-center items-center gap-x-2">
               <div className="animate-spin rounded-full w-6 h-6 border-2 border-transparent border-b-blue-600 border-l-blue-600 "></div>
               <div className="text-xs text-gray-500">please wait</div>
             </div>
           )}
-          {(gradeQuery.isError || subjectQuery.isError) && (
-            <div className="col-span-1 sm:col-span-2 md:col-span-3 flex justify-center items-center gap-x-2">
-              <div className="text-xs text-red-500 border border-red-500 p-5">
+          {(gradeQuery.isError ||
+            subjectQuery.isError ||
+            formMutation.isError) && (
+            <div className="col-span-1  sm:col-span-2 md:col-span-3 flex justify-center items-center gap-x-2">
+              <div className="text-xs rounded-md text-red-500 border border-red-500 p-5">
                 Something went wrong.
+              </div>
+            </div>
+          )}
+
+          {formMutation.isSuccess && (
+            <div className="col-span-1 sm:col-span-2 md:col-span-3 flex justify-center items-center gap-x-2">
+              <div className="text-xs text-green-500 border border-green-500 p-5 rounded-md">
+                Your class created success.{" "}
+                <span className="underline cursor-pointer font-bold">
+                  Go to class
+                </span>
               </div>
             </div>
           )}
@@ -111,6 +153,7 @@ function CreateRoomPage() {
               value={formik.values.grade}
               onBlurHandle={formik.handleBlur}
               onChangeHandle={formik.handleChange}
+              required={true}
               options={(gradeQuery.isSuccess && gradeQuery.data
                 ? gradeQuery.data
                 : []
@@ -130,6 +173,7 @@ function CreateRoomPage() {
               value={formik.values.subject}
               onBlurHandle={formik.handleBlur}
               onChangeHandle={formik.handleChange}
+              required={true}
               options={(subjectQuery.isSuccess && subjectQuery.data
                 ? subjectQuery.data
                 : []
@@ -164,8 +208,12 @@ function CreateRoomPage() {
             <input
               type="submit"
               value={"Create Class"}
-              className="generic-button-primary disabled:bg-gray-600"
-              disabled={!gradeQuery.isSuccess || !subjectQuery.isSuccess}
+              className="generic-button-primary disabled:bg-gray-600 cursor-pointer disabled:cursor-wait"
+              disabled={
+                !gradeQuery.isSuccess ||
+                !subjectQuery.isSuccess ||
+                formMutation.isLoading
+              }
             />
           </div>
         </div>
