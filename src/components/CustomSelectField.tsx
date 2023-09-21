@@ -1,15 +1,27 @@
 "use client";
 import React from "react";
 
+export type SelectType = {
+  value?: string;
+  optionName?: string;
+};
+type PropType = {
+  placeholder?: string;
+  onChangeHandle?: (e: React.ChangeEvent) => void;
+  onBlurHandle?: (e: React.TouchEvent) => void;
+  inputName?: string;
+  value?: string;
+  options?: SelectType[];
+};
+
 function CustomSelectField({
   placeholder = "",
   onChangeHandle = () => {},
-  onInputHandle = () => {},
+  onBlurHandle = () => {},
   inputName = "",
-  value,
-  defaultValue,
+  value = "",
   options = [],
-}) {
+}: PropType) {
   return (
     <select
       id={inputName}

@@ -8,7 +8,6 @@ const CustomInputField = ({
   onInputHandle = () => {},
   inputName = "",
   value = "",
-  defaultValue = "",
 }) => {
   return (
     <input
