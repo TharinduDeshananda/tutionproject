@@ -4,36 +4,65 @@ import Link from "next/link";
 import React, { ChangeEvent, useState } from "react";
 import CustomInputField from "../CustomInputField";
 import CustomTextArea from "../CustomTextArea";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
 type PropType = {
   roomId?: string;
 };
 
-type formType = {
+type FormType = {
   resourceName?: string;
   description?: string;
   resourceFiles?: Blob[];
 };
 
 function AddResourceComp({ roomId }: PropType) {
-  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [fileList, setFileList] = useState<Blob[]>([]);
   const [progress, setProgress] = useState(0);
-  const formik = useFormik<formType>({
+  const formik = useFormik<FormType>({
     initialValues: { description: "", resourceName: "", resourceFiles: [] },
     onSubmit: (values) => {
       console.log(values);
+      formMutation.mutate(values);
     },
   });
 
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
     const files: FileList = e.currentTarget.files;
-    const newList: string[] = [];
+    const newFileList: Blob[] = [];
     for (let i = 0; i < files.length; ++i) {
-      newList.push(files.item(i).name);
+      const item = files.item(i);
+      newFileList.push(item);
     }
-    if (newList) setFileNames(newList);
-
+    if (newFileList) setFileList(newFileList);
     formik.handleChange(e);
   }
+
+  const formMutation = useMutation({
+    mutationFn: async (values: FormType) => {
+      const formData = new FormData();
+      formData.append("description", values.description);
+      formData.append("resourceName", values.resourceName);
+
+      fileList.forEach((item) => {
+        formData.append("resourceFiles", item, item.name);
+      });
+
+      const response = await fetch("/api/classroom/resource", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Failed resource upload");
+      return await response.json();
+    },
+    onError: (error: Error) => {
+      toast.error("Upload failed: " + error.message);
+    },
+    onSuccess: () => {
+      toast.success("Upload success");
+    },
+  });
 
   return (
     <div className="w-full">
@@ -63,18 +92,18 @@ function AddResourceComp({ roomId }: PropType) {
         <div className="flex items-center justify-center w-full">
           <label
             htmlFor="dropzone-file"
-            className=" p-5 flex flex-col items-center justify-center w-full overflow-y-auto h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 "
+            className="flex flex-col items-center justify-center w-full h-64 p-5 overflow-y-auto border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
           >
-            {fileNames && (
-              <div className="w-full flex flex-col gap-x-2 flex-1 p-5">
-                {fileNames.map((i, index) => (
+            {fileList && (
+              <div className="flex flex-col flex-1 w-full p-5 gap-x-2">
+                {fileList.map((i, index) => (
                   <p key={index}>
-                    {index + 1}). {i}
+                    {index + 1}). {i.name}
                   </p>
                 ))}
               </div>
             )}
-            {fileNames.length === 0 && (
+            {fileList.length === 0 && (
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
                   className="w-8 h-8 mb-4 text-gray-500 "
@@ -113,14 +142,14 @@ function AddResourceComp({ roomId }: PropType) {
         <div className="flex justify-around w-full px-1 my-2 sm:px-2 md:px-5">
           <Link href={"?"}>
             <input
-              className="generic-button-primary cursor-pointer hover:bg-blue-500"
+              className="cursor-pointer generic-button-primary hover:bg-blue-500"
               type="reset"
               value={"Cancel"}
             />
           </Link>
 
           <input
-            className="generic-button-primary cursor-pointer hover:bg-blue-500"
+            className="cursor-pointer generic-button-primary hover:bg-blue-500"
             type="submit"
             value={"Upload"}
           />
