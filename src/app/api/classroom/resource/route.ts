@@ -1,18 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextRequest,
+} from "next/server";
+import { createEdgeRouter } from "next-connect";
+import multer from "multer";
 
-export async function POST(req: NextRequest) {
-  try {
-    const formData = await req.formData();
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: "./public/uploads",
+    filename: (req, file, cb) => cb(null, file.originalname),
+  }),
+});
 
-    console.log(formData.get("resourceFiles"));
+interface RequestContext {}
 
-    return NextResponse.json("OK");
-  } catch (e) {
-    console.log(e);
-    return NextResponse.json("OK");
-  }
+const router = createEdgeRouter<NextRequest, RequestContext>();
 
+router.use(upload.array("resourceFiles"));
+router.post(async (req) => {
   return NextResponse.json("OK");
-}
+});
 
+export async function POST(request: NextRequest, ctx: RequestContext) {
+  return router.run(request, ctx);
+}
 export const revalidate = 0;
