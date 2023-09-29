@@ -53,7 +53,7 @@ function AssignmentDetails() {
               <td className="hidden px-6 py-4 text-sm text-gray-500 whitespace-nowrap md:table-cell">
                 {item.dueDate}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-500  whitespace-nowrap">
+              <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                 {item.status}
               </td>
             </tr>

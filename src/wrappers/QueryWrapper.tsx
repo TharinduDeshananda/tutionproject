@@ -3,7 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { ToastContainer } from "react-toastify";
 import ToastContainerWrapper from "./ToastContainerWrapper";
-const queryClient = new QueryClient({ defaultOptions: { queries: {} } });
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { refetchOnWindowFocus: false } },
+});
 
 function QueryWrapper({ children }: { children: React.ReactNode }) {
   return (

@@ -1,19 +1,55 @@
 import { classRooms } from "@/constants";
-import { Document } from "mongoose";
+import { Document, FilterQuery } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import UserRole from "src/enum/UserRole";
 import { db } from "src/helpers/db";
 import ClassRoomDto from "src/models/dto/ClassRoomDto";
 import UserDto from "src/models/dto/UserDto";
+import ClassRoomResponseDto from "src/models/dto/response/ClassRoomResponseDto";
 
-export async function getClassRoomsFiltered() {
+export class ClassFilterationDto {
+  className?: string;
+  classCode?: string;
+  grade?: string;
+  subject?: string;
+  teacher?: string;
+  year?: number;
+}
+
+export async function getClassRoomsFiltered(
+  filter: ClassFilterationDto,
+  page: number = 0,
+  size: number = 0
+): Promise<ClassRoomResponseDto[]> {
   try {
     console.log("method getClassRoomsFiltered start");
+
+    const filterQuery: FilterQuery<ClassFilterationDto> = {};
+
+    if (filter.classCode)
+      filterQuery.classCode = { $regex: new RegExp(filter.classCode, "i") };
+    if (filter.className)
+      filterQuery.className = { $regex: new RegExp(filter.className, "i") };
+    if (filter.grade) filterQuery.grade = filter.grade;
+    if (filter.subject) filterQuery.subject = filter.subject;
+    if (filter.teacher) filterQuery.teacher = filter.teacher;
+    if (filter.year) filterQuery.year = filter.year;
+
+    if (page == 0 || size == 0) {
+      const rooms = await db.ClassRoomEntity.find()
+        .populate("subject")
+        .populate("grade")
+        .populate("teacher");
+      return rooms;
+    }
+
     const rooms = await db.ClassRoomEntity.find()
       .populate("subject")
       .populate("grade")
-      .populate("teacher");
+      .populate("teacher")
+      .skip((page - 1) * size)
+      .limit(size);
     return rooms;
   } catch (e) {
     console.log("method getClassRoomsFiltered failed: ", e);
