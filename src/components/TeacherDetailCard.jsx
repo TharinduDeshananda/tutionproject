@@ -14,22 +14,21 @@ function TeacherDetailCard({
   const [showDropdown, setShowDropDown] = useState(false);
 
   useEffect(() => {
-    console.log("setting toggled: ", toggled);
     setShowDropDown(toggled.state);
   }, [toggled]);
 
   return (
     <div className="w-[320px] px-2 sm:px-5 py-5 flex flex-col bg-white rounded-md shadow-md">
       {/* top avatar and details */}
-      <div className="w-full flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center w-full gap-2">
         {/* avatar */}
         <div className="w-[50px] rounded-full overflow-hidden h-[50px] relative">
           <Image fill alt={teacherName} src={testImage} />
         </div>
 
-        <div className="flex-1  flex flex-col text-base font-bold text-gray-600">
+        <div className="flex flex-col flex-1 text-base font-bold text-gray-600">
           <span>{teacherName}</span>
-          <button className="bg-green-500 text-white text-xs font-light self-start hover:bg-green-700  px-5 rounded-sm py-1">
+          <button className="self-start px-5 py-1 text-xs font-light text-white bg-green-500 rounded-sm hover:bg-green-700">
             View Teacher
           </button>
         </div>
@@ -38,13 +37,13 @@ function TeacherDetailCard({
       <button
         onClick={() => setShowDropDown((c) => !c)}
         disabled={subjectsThisYear.length === 0 && classesThisYear.length === 0}
-        className="border text-blue-700 border-blue-700 disabled:bg-gray-500 disabled:cursor-auto disabled:text-black w-full flex justify-center items-center hover:bg-blue-700 hover:text-white mt-5 py-1 rounded-md cursor-pointer"
+        className="flex items-center justify-center w-full py-1 mt-5 text-blue-700 border border-blue-700 rounded-md cursor-pointer disabled:bg-gray-500 disabled:cursor-auto disabled:text-black hover:bg-blue-700 hover:text-white"
       >
         <FaCaretDown />
       </button>
       {/* dropdown content */}
       <div
-        className="w-full  flex flex-col mt-3 overflow-hidden"
+        className="flex flex-col w-full mt-3 overflow-hidden"
         style={{ height: showDropdown ? "auto" : 0 }}
       >
         {subjectsThisYear.length > 0 && (

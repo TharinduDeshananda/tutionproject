@@ -7,7 +7,6 @@ function ClickOutSideWrapper({ children }) {
 
   const handleOutsideClick = (event) => {
     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-      console.log("outside clicked");
       // Click occurred outside the wrapper
       setIsToggled({ state: false });
     }
