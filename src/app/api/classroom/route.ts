@@ -8,7 +8,11 @@ import {
   createClassRoom,
   getClassRoomsFiltered,
 } from "src/services/ClassRoomService";
-
+/**
+ * create class room
+ * @param req
+ * @returns
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -24,6 +28,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * filter class rooms
+ * @param req
+ * @returns
+ */
 export async function GET(req: NextRequest) {
   try {
     const body = req.nextUrl.searchParams;

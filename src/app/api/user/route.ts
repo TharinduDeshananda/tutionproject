@@ -17,10 +17,12 @@ export async function POST(request: NextRequest) {
     dto.password = body.get("password") as string;
     dto.role = body.get("role") as UserRole;
 
-    await createUser(dto);
-    return NextResponse.json({ status: 0, message: "OK" });
+    const createdUser = await createUser(dto);
+    return NextResponse.json({ status: 0, message: "OK", body: createdUser });
   } catch (error) {
     console.log(error);
-    return NextResponse.json({ status: 1, message: "Failed" });
+    return NextResponse.json({ status: 1, message: error.message });
   }
 }
+
+export const revalidate = 0;

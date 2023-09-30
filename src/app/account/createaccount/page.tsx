@@ -2,7 +2,10 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useFormik } from "formik";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import Spin from "@/util/Spin";
 
 const initialValues = {
   firstName: "",
@@ -16,6 +19,7 @@ const initialValues = {
 };
 
 function CreateUserPage() {
+  const router = useRouter();
   const formik = useFormik({
     initialValues: initialValues,
     onSubmit: async (values) => {
@@ -30,11 +34,31 @@ function CreateUserPage() {
       formData.set("address", values.address);
       formData.set("password", values.password);
 
+      submitMutation.mutate(formData);
+    },
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
       const response = await fetch("/api/user", {
         method: "POST",
         body: formData,
       });
-      if (response.ok) redirect("/login");
+
+      const body = await response.json();
+      console.log(body);
+      if (!response.ok || body.status != 0) {
+        console.log("Failed: ", body.message);
+        throw new Error("User Creation failed: " + body.message);
+      }
+    },
+    onError: (err: Error) => {
+      console.log(err);
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      console.log("Success");
+      router.push("/login");
     },
   });
 
@@ -64,6 +88,8 @@ function CreateUserPage() {
       encType=""
     >
       <div className="w-full min-h-[100vh] bg-orange-200 flex justify-center items-center flex-col overflow-auto">
+        <Spin show={submitMutation.isLoading} />
+
         {/* main wrapper */}
         <div className=" rounded-md drop-shadow-md min-w-[320px] h-full sm:min-h-[90vh] grid grid-cols-1 md:grid-cols-2 max-w-[768px] bg-white w-full gap-2 p-5 auto-rows-min ">
           <h1 className="col-span-1 mt-5 text-2xl font-bold text-center text-gray-600 md:col-span-2">
@@ -265,7 +291,8 @@ function CreateUserPage() {
             <input
               type="submit"
               value={"Create Account"}
-              className=" text-xs mt-5 focus:outline-none text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg  px-5 py-2.5 mr-2 mb-2 "
+              disabled={submitMutation.isLoading || submitMutation.isSuccess}
+              className="disabled:bg-gray-500 disabled:cursor-wait text-xs mt-5 focus:outline-none text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg  px-5 py-2.5 mr-2 mb-2 "
             />
           </div>
           {/* submit button end */}

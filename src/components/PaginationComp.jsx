@@ -6,6 +6,7 @@ function PaginationComp({
   pageCount,
   perPage = 10,
   totalResults = 200,
+  setPage = (pageNumber) => {},
 }) {
   const pages = useMemo(() => {
     const pageList = [];
@@ -51,11 +52,15 @@ function PaginationComp({
             number={i}
             key={index}
             currentPage={index + 1 === currentPage}
+            onClick={() => {
+              setPage(i);
+            }}
           />
         ))}
       </div>
-      <p className="text-xs font-normal mx-5">
-        Showing results {perPage} of {totalResults} results .
+      <p className="mx-5 text-xs font-normal">
+        Showing results {totalResults < perPage ? totalResults : perPage} of{" "}
+        {totalResults} results .
       </p>
     </div>
   );

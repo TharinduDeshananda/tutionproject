@@ -16,7 +16,7 @@ export async function createUser(userDto: UserDto) {
     return createdUser;
   } catch (error) {
     console.log("method createUser failed: ", error);
-    console.log(error);
+    throw error;
   }
 }
 

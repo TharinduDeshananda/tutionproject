@@ -8,6 +8,7 @@ import ClassRoomDto from "src/models/dto/ClassRoomDto";
 import SubjectDto from "src/models/dto/SubjectDto";
 import UserDto from "src/models/dto/UserDto";
 import ClassRoomResponseDto from "src/models/dto/response/ClassRoomResponseDto";
+import PageResponse from "src/models/dto/response/PageResponse";
 
 export class ClassFilterationDto {
   className?: string;
@@ -22,7 +23,7 @@ export async function getClassRoomsFiltered(
   filter: ClassFilterationDto,
   page: number = 0,
   size: number = 0
-): Promise<ClassRoomResponseDto[]> {
+): Promise<PageResponse<ClassRoomResponseDto[]>> {
   try {
     console.log("method getClassRoomsFiltered start");
 
@@ -41,12 +42,19 @@ export async function getClassRoomsFiltered(
     if (filter.teacher) filterQuery.teacher = filter.teacher;
     if (filter.year) filterQuery.year = filter.year;
     console.log(filterQuery);
+    const count = await db.ClassRoomEntity.count(filterQuery);
     if (page == 0 || size == 0) {
       const rooms = await db.ClassRoomEntity.find(filterQuery)
         .populate("subject")
         .populate("grade")
         .populate("teacher");
-      return rooms;
+      return {
+        data: rooms,
+        page: page,
+        size: size,
+        totalPages: 1,
+        total: count,
+      };
     }
 
     const rooms = await db.ClassRoomEntity.find(filterQuery)
@@ -55,7 +63,13 @@ export async function getClassRoomsFiltered(
       .populate("teacher")
       .skip((page - 1) * size)
       .limit(size);
-    return rooms;
+    return {
+      data: rooms,
+      page: page,
+      size: size,
+      totalPages: Math.ceil(count / size),
+      total: count,
+    };
   } catch (e) {
     console.log("method getClassRoomsFiltered failed: ", e);
     throw e;

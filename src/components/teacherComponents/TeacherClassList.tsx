@@ -23,7 +23,12 @@ function TeacherClassList() {
   }, []);
 
   const classQuery = useQuery({
-    queryKey: ["classroom", sessionData.id ?? "", currentQueryParams],
+    queryKey: [
+      "classroom",
+      sessionData.id ?? "",
+      currentQueryParams,
+      currentPage,
+    ],
     queryFn: async ({ queryKey }) => {
       if (!queryKey[1]) throw new Error("Teacher id not available");
 
@@ -59,13 +64,18 @@ function TeacherClassList() {
       </div>
     );
 
+  function setParams(params: string) {
+    setCurrentPage(1);
+    setCurrentQueryParams(params);
+  }
+
   return (
     <div>
       <h2 className="text-sm font-bold text-gray-500 shadow-none md:text-2xl">
         Your classes
       </h2>
 
-      <TeacherClassFilterStudent queryStringChange={setCurrentQueryParams} />
+      <TeacherClassFilterStudent queryStringChange={setParams} />
 
       {classQuery.isLoading ? (
         <div className="w-full min-h-[300px] flex justify-center items-center flex-col">
@@ -74,7 +84,13 @@ function TeacherClassList() {
       ) : (
         <>
           {/* pagination component */}
-          <PaginationComp currentPage={currentPage} pageCount={12} />
+          <PaginationComp
+            currentPage={classQuery.data.page}
+            pageCount={classQuery.data.totalPages}
+            perPage={classQuery.data.size}
+            totalResults={classQuery.data.total}
+            setPage={setCurrentPage}
+          />
           {/* data table */}
           <table className="w-full divide-y divide-gray-200 ">
             <thead className="bg-gray-50">
@@ -113,7 +129,7 @@ function TeacherClassList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {classQuery.data.map((item, index) => (
+              {classQuery.data.data.map((item, index) => (
                 <tr
                   key={index}
                   className="rounded-md cursor-pointer hover:bg-blue-50"
