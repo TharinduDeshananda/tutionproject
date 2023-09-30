@@ -13,20 +13,22 @@ type PropType = {
 };
 
 type FormType = {
-  searchName?: string;
+  className?: string;
+  classCode?: string;
   grade?: string;
   subject?: string;
   year?: number;
 };
 
-const initValues: FormType = {
-  searchName: "",
-  grade: "",
-  subject: "",
-  year: new Date().getUTCFullYear(),
-};
-
 function TeacherClassFilterStudent({ queryStringChange }: PropType) {
+  const initValues: FormType = {
+    className: "",
+    classCode: "",
+    grade: "",
+    subject: "",
+    year: 0,
+  };
+
   const formik = useFormik<FormType>({
     initialValues: initValues,
     onSubmit: (values) => {
@@ -47,7 +49,12 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
       const body = await response.json();
       if (body.status !== 0) throw new Error("Grades fetch failed");
       const data = body.body;
-      formik.setFieldValue("grade", data[0].gradeCode);
+      if (data && Array.isArray(data)) {
+        data.forEach((i) => {
+          i.id = i._id;
+        });
+      }
+      // formik.setFieldValue("grade", data[0]._id);
       return data;
     },
   });
@@ -60,7 +67,13 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
       const body = await response.json();
       if (body.status !== 0) throw new Error("Subject fetch failed");
       const data = body.body;
-      formik.setFieldValue("subject", data[0].subjectCode);
+
+      if (data && Array.isArray(data)) {
+        data.forEach((i) => {
+          i.id = i._id;
+        });
+      }
+      // formik.setFieldValue("subject", data[0]._id);
       return data;
     },
   });
@@ -82,11 +95,19 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
         )}
 
         <CustomInputField
-          inputName="searchName"
-          placeholder="class name or code"
+          inputName="className"
+          placeholder="class name"
           type="text"
           inputStyle="text-xs"
-          value={formik.values.searchName}
+          value={formik.values.className}
+          onChangeHandle={formik.handleChange}
+        />
+        <CustomInputField
+          inputName="classCode"
+          placeholder="class code"
+          type="text"
+          inputStyle="text-xs"
+          value={formik.values.classCode}
           onChangeHandle={formik.handleChange}
         />
         <CustomSelectField
@@ -95,13 +116,13 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
           onChangeHandle={formik.handleChange}
           value={formik.values.grade}
           options={(gradeQuery.isSuccess && gradeQuery.data
-            ? gradeQuery.data
-            : []
+            ? [{ gradeName: "any grade", id: "" }, ...gradeQuery.data]
+            : [{ gradeName: "any grade", id: "" }]
           ).map(
             (i) =>
               ({
                 optionName: i.gradeName,
-                value: i.gradeCode,
+                value: i.id,
               } as SelectType)
           )}
         />
@@ -111,13 +132,13 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
           value={formik.values.subject}
           onChangeHandle={formik.handleChange}
           options={(subjectQuery.isSuccess && subjectQuery.data
-            ? subjectQuery.data
-            : []
+            ? [{ subjectName: "any subject", id: "" }, ...subjectQuery.data]
+            : [{ subjectName: "any subject", id: "" }]
           ).map(
             (i) =>
               ({
                 optionName: i.subjectName,
-                value: i.subjectCode,
+                value: i.id,
               } as SelectType)
           )}
         />
@@ -132,7 +153,7 @@ function TeacherClassFilterStudent({ queryStringChange }: PropType) {
 
         <div className="col-span-1 sm:col-span-2 md:col-span-3 flex justify-center items-center">
           <input
-            className="generic-button-primary rounded-md hover:bg-blue-800 cursor-pointer"
+            className="generic-button-primary rounded-md hover:bg-blue-800 cursor-pointer disabled:bg-gray-500 disabled:cursor-wait"
             value={"Filter"}
             type="submit"
             disabled={!gradeQuery.isSuccess || !subjectQuery.isSuccess}

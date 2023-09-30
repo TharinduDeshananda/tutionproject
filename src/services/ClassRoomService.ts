@@ -5,6 +5,7 @@ import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import UserRole from "src/enum/UserRole";
 import { db } from "src/helpers/db";
 import ClassRoomDto from "src/models/dto/ClassRoomDto";
+import SubjectDto from "src/models/dto/SubjectDto";
 import UserDto from "src/models/dto/UserDto";
 import ClassRoomResponseDto from "src/models/dto/response/ClassRoomResponseDto";
 
@@ -28,23 +29,27 @@ export async function getClassRoomsFiltered(
     const filterQuery: FilterQuery<ClassFilterationDto> = {};
 
     if (filter.classCode)
-      filterQuery.classCode = { $regex: new RegExp(filter.classCode, "i") };
+      filterQuery.classCode = {
+        $regex: new RegExp(filter.classCode, "i"),
+      };
     if (filter.className)
-      filterQuery.className = { $regex: new RegExp(filter.className, "i") };
+      filterQuery.className = {
+        $regex: new RegExp(filter.className, "i"),
+      };
     if (filter.grade) filterQuery.grade = filter.grade;
     if (filter.subject) filterQuery.subject = filter.subject;
     if (filter.teacher) filterQuery.teacher = filter.teacher;
     if (filter.year) filterQuery.year = filter.year;
-
+    console.log(filterQuery);
     if (page == 0 || size == 0) {
-      const rooms = await db.ClassRoomEntity.find()
+      const rooms = await db.ClassRoomEntity.find(filterQuery)
         .populate("subject")
         .populate("grade")
         .populate("teacher");
       return rooms;
     }
 
-    const rooms = await db.ClassRoomEntity.find()
+    const rooms = await db.ClassRoomEntity.find(filterQuery)
       .populate("subject")
       .populate("grade")
       .populate("teacher")

@@ -5,8 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getSession } from "next-auth/react";
 import { User } from "next-auth";
 import TeacherClassFilterStudent from "../TeacherClassFilterStudent";
+import { useRouter } from "next/navigation";
 
 function TeacherClassList() {
+  const router = useRouter();
   const [sessionData, setSesisonData] = useState<User>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [currentQueryParams, setCurrentQueryParams] = useState("");
@@ -50,6 +52,13 @@ function TeacherClassList() {
     enabled: !!sessionData.id,
   });
 
+  if (classQuery.error)
+    return (
+      <div className="w-full min-h-[300px] flex justify-center items-center flex-col">
+        <h1>Loading Failed. Please try again!</h1>
+      </div>
+    );
+
   return (
     <div>
       <h2 className="text-sm font-bold text-gray-500 shadow-none md:text-2xl">
@@ -74,7 +83,7 @@ function TeacherClassList() {
                   scope="col"
                   className="px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
-                  Class Name
+                  Class
                 </th>
                 <th
                   scope="col"
@@ -105,15 +114,36 @@ function TeacherClassList() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {classQuery.data.map((item, index) => (
-                <tr key={index}>
-                  <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap">
-                    {item.className}
+                <tr
+                  key={index}
+                  className="rounded-md cursor-pointer hover:bg-blue-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    router.push(`classrooms/${item._id}`);
+                  }}
+                >
+                  <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap ">
+                    <div className="flex flex-col justify-center">
+                      <div>{item.className}</div>
+                      <div className="text-gray-400">{item.classCode}</div>
+                    </div>
                   </td>
                   <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap sm:table-cell">
-                    {item.grade?.gradeCode ?? "NA"}
+                    <div className="flex flex-col justify-center">
+                      <div>{item.grade?.gradeName ?? "NA"}</div>
+                      <div className="text-gray-400">
+                        {item.grade?.gradeCode ?? "NA"}
+                      </div>
+                    </div>
                   </td>
                   <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap md:table-cell">
-                    {item.subject?.subjectCode ?? "NA"}
+                    <div className="flex flex-col justify-center">
+                      <div>{item.subject?.subjectName ?? "NA"}</div>
+                      <div className="text-gray-400">
+                        {item.subject?.subjectCode ?? "NA"}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-2 py-4 text-xs text-gray-500 whitespace-nowrap">
                     {item?.year ?? "NA"}
