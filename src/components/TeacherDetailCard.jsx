@@ -5,7 +5,6 @@ import { FaCaretDown } from "react-icons/fa";
 import testImage from "../../public/31190.jpg";
 function TeacherDetailCard({
   teacherName,
-  teacherUrl,
   subjectsThisYear = [],
   classesThisYear = [],
   year,

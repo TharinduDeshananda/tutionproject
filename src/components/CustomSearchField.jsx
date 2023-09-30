@@ -5,11 +5,11 @@ function CustomSearchField({
   placeholder = "",
   inputName,
   value,
-  onChange = () => {},
+  onChange = (e) => {},
 }) {
   return (
     <div className="relative w-full text-xs">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none outline-none">
+      <div className="absolute inset-y-0 left-0 flex items-center pl-3 outline-none pointer-events-none">
         <svg
           className="w-4 h-4 text-gray-500 "
           aria-hidden="true"
@@ -32,7 +32,7 @@ function CustomSearchField({
         name={inputName}
         value={value}
         onChange={onChange}
-        className="text-xs outline-none block w-full p-4 pl-10 sm:text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50   "
+        className="block w-full p-4 pl-10 text-xs text-gray-900 border border-gray-300 rounded-lg outline-none sm:text-sm bg-gray-50 "
         placeholder={placeholder}
       />
     </div>

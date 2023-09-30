@@ -5,19 +5,61 @@ import CustomSelectField from "@/components/CustomSelectField";
 import PaginationComp from "@/components/PaginationComp";
 import TeacherDetailCard from "@/components/TeacherDetailCard";
 import CustomButton from "@/util/CustomButton";
+import Spin from "@/util/Spin";
 import ClickOutSideWrapper from "@/wrappers/ClickOutSideWrapper";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import React, { useCallback, useMemo, useState } from "react";
 
-const initialValues = {
+type FormType = {
+  teacherName?: string;
+  className?: string;
+  classYear?: number;
+  subject?: string;
+  grade?: string;
+};
+
+const initialValues: FormType = {
   teacherName: "",
   className: "",
-  classYear: parseInt(new Date().getFullYear()),
+  classYear: 0,
   subject: "",
   grade: "",
 };
 
 function Teacher() {
+  const subjectQuery = useQuery({
+    queryKey: ["subject"],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch("/api/subject");
+      const body = await response.json();
+      if (!response.ok || body.status !== 0) throw new Error(body.message);
+      return body.body;
+    },
+  });
+  const gradeQuery = useQuery({
+    queryKey: ["grade"],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch("/api/grade");
+      const body = await response.json();
+      if (!response.ok || body.status !== 0) throw new Error(body.message);
+      return body.body;
+    },
+  });
+
+  const submitQuery = useMutation({
+    mutationFn: async (values: FormType) => {
+      const entries = Object.entries(values);
+      const params = new URLSearchParams();
+      entries.forEach((entry) => {
+        params.append(entry[0], entry[1] as string);
+      });
+
+      const fetchUrl = `/api/user?${params.toString()}`;
+      console.log(fetchUrl);
+    },
+  });
+
   const onSubmit = useCallback((values) => {
     console.log(values);
   }, []);
@@ -25,19 +67,20 @@ function Teacher() {
   const formik = useFormik({ initialValues, onSubmit: onSubmit });
 
   return (
-    <div className="w-full flex flex-col items-center text-xs">
+    <div className="flex flex-col items-center w-full text-xs">
       <form
         action=""
-        className=" px-1 py-5 block bg-white m-5 self-stretch shadow-md rounded-md"
+        className="self-stretch block px-1 py-5 m-5 bg-white rounded-md shadow-md "
         onSubmit={formik.handleSubmit}
       >
+        <Spin show={gradeQuery.isLoading || subjectQuery.isLoading} />
         <CustomSearchField
           placeholder="search using teacher name"
           inputName={"teacherName"}
           value={formik.values.teacherName}
           onChange={formik.handleChange}
         />
-        <div className="my-5 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 justify-center gap-4">
+        <div className="grid justify-center w-full grid-cols-1 gap-4 my-5 sm:grid-cols-2 md:grid-cols-3">
           <CustomInputField
             placeholder="class name"
             onChangeHandle={formik.handleChange}
@@ -51,40 +94,48 @@ function Teacher() {
             inputName="classYear"
             onChangeHandle={formik.handleChange}
             value={formik.values.classYear}
-            defaultValue={parseInt(new Date().getUTCFullYear())}
           />
           <CustomSelectField
             placeholder="Subject"
             inputName="subject"
             value={formik.values.subject}
             onChangeHandle={formik.handleChange}
-            options={[
-              { value: null, optionName: "any subject" },
-              { value: "maths", optionName: "Maths" },
-              { value: "science", optionName: "Science" },
-              { value: "history", optionName: "History" },
-            ]}
+            options={
+              subjectQuery.isSuccess
+                ? [
+                    { value: "", optionName: "any subject" },
+                    ...subjectQuery.data.map((i) => ({
+                      value: i._id,
+                      optionName: i.subjectName,
+                    })),
+                  ]
+                : []
+            }
           />
           <CustomSelectField
             placeholder="grade"
             inputName="grade"
             value={formik.values.grade}
             onChangeHandle={formik.handleChange}
-            options={[
-              { value: null, optionName: "any grade" },
-              { value: "grade06", optionName: "Grade 06" },
-              { value: "grade07", optionName: "Grade 07" },
-              { value: "grade08", optionName: "Grade 08" },
-              { value: "grade09", optionName: "Grade 09" },
-              { value: "grade10", optionName: "Grade 10" },
-            ]}
+            options={
+              gradeQuery.isSuccess
+                ? [
+                    { value: "", optionName: "any grade" },
+                    ...gradeQuery.data.map((i) => ({
+                      value: i._id,
+                      optionName: i.gradeName,
+                    })),
+                  ]
+                : []
+            }
           />
         </div>
-        <div className="w-full flex justify-center items-center">
+        <div className="flex items-center justify-center w-full">
           <input
             type="submit"
-            className="tracking-wider bg-blue-700 text-white px-5 py-2 rounded-md cursor-pointer hover:bg-blue-500"
+            className="px-5 py-2 tracking-wider text-white bg-blue-700 rounded-md cursor-pointer disabled:bg-gray-500 disabled:cursor-wait hover:bg-blue-500"
             value={"Filter"}
+            disabled={subjectQuery.isLoading || gradeQuery.isLoading}
           />
         </div>
       </form>
@@ -95,7 +146,7 @@ function Teacher() {
           totalResults={200}
           pageCount={20}
         />
-        <div className="w-full flex flex-row gap-5 flex-wrap justify-center">
+        <div className="flex flex-row flex-wrap justify-center w-full gap-5">
           <ClickOutSideWrapper>
             {(toggled) => (
               <TeacherDetailCard
