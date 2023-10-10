@@ -6,7 +6,7 @@ export async function uploadBlobToLocalStorage(
   type: string
 ) {
   try {
-    const url = path.join("public", "uploads", `${fileName}`);
+    const url = path.join("uploads", `${fileName}`);
     const buffer = await blob.arrayBuffer();
 
     await fs.promises.writeFile(url, Buffer.from(buffer));
