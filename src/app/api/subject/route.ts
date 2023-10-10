@@ -51,9 +51,9 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-export async function DELETE({ params }) {
+export async function DELETE(req: NextRequest) {
   try {
-    const subjectId = params.id;
+    const subjectId = req.nextUrl.searchParams.get("id");
 
     if (!subjectId) throw new Error("Subject id is required");
     await removeSubject(subjectId);
