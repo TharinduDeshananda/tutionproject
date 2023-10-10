@@ -1,15 +1,18 @@
 "use client";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import CustomModal from "./modalcomp/CustomModal";
 import { testQuote } from "@/constants";
 import { FaPencilAlt } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-function UserProfileDescriptionComp({ description: string }) {
+function UserProfileDescriptionComp({ description }: { description: string }) {
   const [showModal, setShowModal] = useState(false);
   const [currentText, setCurrentText] = useState(testQuote);
   const textAreaRef = useRef(null);
+  useEffect(() => {
+    setCurrentText(description);
+  }, [description]);
 
   const descriptionMutation = useMutation({
     mutationKey: ["description"],
