@@ -1,4 +1,5 @@
 import UserRole from "src/enum/UserRole";
+import { TeacherDetailsDto } from "./TeacherDetailsDto";
 
 export default class UserDto {
   public id?: string;
@@ -9,5 +10,6 @@ export default class UserDto {
   public imgUrl?: string;
   public mobile?: string;
   public role?: UserRole;
+  public details?: TeacherDetailsDto;
   password?: string;
 }

@@ -1,7 +1,11 @@
 import { plainToInstance } from "class-transformer";
-import { PipelineStage } from "mongoose";
+import { Document, PipelineStage } from "mongoose";
+import { getServerSession } from "next-auth";
+import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import { TeacherFilter } from "src/app/api/teacher/route";
+import UserRole from "src/enum/UserRole";
 import { db } from "src/helpers/db";
+import { TeacherDetailsDto } from "src/models/dto/TeacherDetailsDto";
 import UserDto from "src/models/dto/UserDto";
 import PageResponse from "src/models/dto/response/PageResponse";
 import { TeacherFilterResponse } from "src/models/dto/response/TeacherFilterResponse";
@@ -102,5 +106,41 @@ export async function filterTeachers(
   } catch (e) {
     console.log("method filterTeachers failed: ", e);
     throw e;
+  }
+}
+
+export async function handleDetailsChange(request: TeacherDetailsDto) {
+  try {
+    console.log("method handleDetailsChange start");
+    const session = await getServerSession(authOptions);
+
+    const email = session.user.email;
+    if (!email) throw new Error("user email not found");
+    const user: Document<UserDto> = await db.UserEntity.findOne({
+      email: email,
+    });
+    if (!user) throw new Error("User not found");
+    if (user.get("role") !== UserRole.TEACHER)
+      throw new Error("User role not match");
+
+    if (!user.get("details")) {
+      user.set("details", request);
+      await user.save();
+      return;
+    } else {
+      if (request.profileImgUrl)
+        user.set("details.profileImgUrl", request.profileImgUrl);
+      if (request.avatarImgUrl)
+        user.set("details.avatarImgUrl", request.avatarImgUrl);
+      if (request.description)
+        user.set("details.description", request.description);
+      if (request.qualifications)
+        user.set("details.qualifications", request.qualifications);
+
+      await user.save();
+    }
+  } catch (error) {
+    console.error("method handleDetailsChange failed: ", error);
+    throw error;
   }
 }

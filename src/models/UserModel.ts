@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import UserDto from "./dto/UserDto";
 import UserRole from "src/enum/UserRole";
+import { teacherDetailsSchema } from "./TeacherDetailsModel";
 
 const userSchema = new mongoose.Schema<UserDto>(
   {
@@ -11,6 +12,7 @@ const userSchema = new mongoose.Schema<UserDto>(
     mobile: String,
     password: String,
     role: { type: String, enum: UserRole, default: UserRole.STUDENT },
+    details: teacherDetailsSchema,
   },
   { timestamps: true }
 );
