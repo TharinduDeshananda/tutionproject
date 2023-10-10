@@ -45,3 +45,5 @@ async function TeacherProfilePage() {
 }
 
 export default TeacherProfilePage;
+
+export const revalidate = 0;
