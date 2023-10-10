@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     if (params.has("grade")) filter.grade = params.get("grade");
 
     const teachers = await filterTeachers(filter);
+
     return NextResponse.json({ status: 0, body: teachers, message: "sucess" });
   } catch (e) {
     return NextResponse.json({ status: 1, message: e.message });

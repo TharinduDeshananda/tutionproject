@@ -4,12 +4,12 @@ import CustomSearchField from "@/components/CustomSearchField";
 import CustomSelectField from "@/components/CustomSelectField";
 import PaginationComp from "@/components/PaginationComp";
 import TeacherDetailCard from "@/components/TeacherDetailCard";
-import CustomButton from "@/util/CustomButton";
+
 import Spin from "@/util/Spin";
 import ClickOutSideWrapper from "@/wrappers/ClickOutSideWrapper";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useFormik } from "formik";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback } from "react";
 import { toast } from "react-toastify";
 import PageResponse from "src/models/dto/response/PageResponse";
 import { TeacherFilterResponse } from "src/models/dto/response/TeacherFilterResponse";
@@ -66,7 +66,7 @@ function Teacher() {
       const body = await response.json();
       if (!response.ok || body.status !== 0) throw new Error(body.message);
       const data = body.body as PageResponse<TeacherFilterResponse[]>;
-      console.log(data);
+
       return data;
     },
     onError: (e: Error) => {

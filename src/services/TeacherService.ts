@@ -20,7 +20,9 @@ export async function filterTeachers(
 
     const pipeline: PipelineStage[] = [
       {
-        $addFields: { fullName: { $concat: ["$firstName", " ", "$lastName"] } },
+        $addFields: {
+          fullName: { $concat: ["$firstName", " ", "$lastName"] },
+        },
       },
       {
         $lookup: {
@@ -95,6 +97,7 @@ export async function filterTeachers(
     pipeline.push({ $skip: skip });
     pipeline.push({ $limit: size });
     const teachers = await db.UserEntity.aggregate(pipeline);
+    teachers.forEach((t) => (t._id = t._id.toString()));
 
     return {
       page: page,

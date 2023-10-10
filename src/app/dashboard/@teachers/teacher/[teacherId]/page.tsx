@@ -1,28 +1,27 @@
 import TimeLineComponent from "@/components/AchievementComponents/TimeLineComponent";
 import UserProfileDescriptionComp from "@/components/UserProfileDescriptionComp";
 import UserProfileImageComp from "@/components/UserProfileImageComp";
-import { getServerSession } from "next-auth";
 import React from "react";
-import { authOptions } from "src/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
 import UserDto from "src/models/dto/UserDto";
 import { db } from "src/helpers/db";
-async function getTeacherDetails(): Promise<UserDto> {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/login");
-  const email = session.user.email;
-  const user: UserDto = await db.UserEntity.findOne({ email: email });
+async function getTeacherDetails(teacherId: string): Promise<UserDto> {
+  const user: UserDto = await db.UserEntity.findById(teacherId);
   if (!user) {
     console.error(
-      "method getTeacherDetails failed: user not found with session email"
+      "method getTeacherDetails failed: user not found with id: " + teacherId
     );
     throw new Error("User not found");
   }
   return user;
 }
 
-async function TeacherProfilePage() {
-  const user: UserDto = await getTeacherDetails();
+async function TeacherProfilePage({
+  params,
+}: {
+  params: { teacherId: string };
+}) {
+  const user: UserDto = await getTeacherDetails(params.teacherId);
+
   return (
     <div className="flex flex-col w-full p-1">
       <div className="mb-[50px]">
