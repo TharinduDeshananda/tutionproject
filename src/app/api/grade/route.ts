@@ -51,9 +51,9 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-export async function DELETE({ params }) {
+export async function DELETE(req: NextRequest) {
   try {
-    const gradeId = params.id;
+    const gradeId = req.nextUrl.searchParams.get("id");
 
     if (!gradeId) throw new Error("Grade id is required");
     await removeGrade(gradeId);
