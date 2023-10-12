@@ -11,6 +11,11 @@ export const REMOVE_TIMELINE = "REMOVE_TIMELINE";
 export const UPDATE_TIMELINE = "UPDATE_TIMELINE";
 const timeLineReducer = (state, action) => {
   switch (action.type) {
+    case "SET_TIMELINE":
+      const newInitState = action.payload;
+      newInitState.sort(sortItemsFromTheirDate);
+      console.log(newInitState);
+      return newInitState;
     case "ADD_TIMELINE":
       const newState = [
         ...state,
@@ -20,7 +25,7 @@ const timeLineReducer = (state, action) => {
       newState.sort(sortItemsFromTheirDate);
       return newState;
     case "REMOVE_TIMELINE":
-      return state.filter((i) => i.id != action.payload);
+      return state.filter((i) => i.id !== action.payload);
 
     case "UPDATE_TIMELINE":
       const existingStateIndex = state.findIndex(

@@ -5,6 +5,7 @@ import {
 } from "./dto/TeacherDetailsDto";
 
 export const teacherQualificationSchema = new Schema<TeacherQualificationDto>({
+  id: Number,
   date: Date,
   title: String,
   description: String,

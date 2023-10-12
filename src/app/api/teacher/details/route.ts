@@ -1,7 +1,14 @@
 import { uploadBlobToLocalStorage } from "@/util/fileHandler";
+import { plainToInstance } from "class-transformer";
 import { NextRequest, NextResponse } from "next/server";
-import { TeacherDetailsDto } from "src/models/dto/TeacherDetailsDto";
-import { handleDetailsChange } from "src/services/TeacherService";
+import {
+  TeacherDetailsDto,
+  TeacherQualificationDto,
+} from "src/models/dto/TeacherDetailsDto";
+import {
+  getTeacherDetails,
+  handleDetailsChange,
+} from "src/services/TeacherService";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,12 +39,42 @@ export async function POST(request: NextRequest) {
       reqObj.avatarImgUrl = avatarImgUrl;
     }
 
-    handleDetailsChange(reqObj);
+    await handleDetailsChange(reqObj);
 
     return NextResponse.json({ status: 0, message: "update success" });
   } catch (e) {
     console.error("Handle teacher details route failed");
     return NextResponse.json({ status: 1, message: e.message });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const email = req.nextUrl.searchParams.get("email");
+    const details = await getTeacherDetails(email);
+    return NextResponse.json({ status: 0, message: "Success", body: details });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ status: 1, message: error.message });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    console.log(body);
+    const dtos: TeacherQualificationDto[] = [];
+    console.log(body.length);
+    body.forEach((element) => {
+      dtos.push(plainToInstance(TeacherQualificationDto, element));
+    });
+    const dto = new TeacherDetailsDto();
+    dto.qualifications = dtos;
+    await handleDetailsChange(dto);
+    return NextResponse.json({ status: 0, message: "update success" });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ status: 1, message: error.message });
   }
 }
 

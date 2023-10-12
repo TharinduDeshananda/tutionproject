@@ -114,7 +114,7 @@ export async function filterTeachers(
 
 export async function handleDetailsChange(request: TeacherDetailsDto) {
   try {
-    console.log("method handleDetailsChange start");
+    console.log("method handleDetailsChange start", request);
     const session = await getServerSession(authOptions);
 
     const email = session.user.email;
@@ -144,6 +144,20 @@ export async function handleDetailsChange(request: TeacherDetailsDto) {
     }
   } catch (error) {
     console.error("method handleDetailsChange failed: ", error);
+    throw error;
+  }
+}
+
+export async function getTeacherDetails(
+  email: string
+): Promise<TeacherDetailsDto> {
+  try {
+    console.log("method getTeacherDetails start");
+    const user: UserDto = await db.UserEntity.findOne({ email: email });
+    if (!user) throw new Error("User not found with email: " + email);
+    return user.details;
+  } catch (error) {
+    console.error("Method getTeacherDetails failed: ", error);
     throw error;
   }
 }

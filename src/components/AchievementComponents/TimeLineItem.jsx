@@ -3,7 +3,13 @@ import React, { useContext } from "react";
 import { FaEraser } from "react-icons/fa";
 import { REMOVE_TIMELINE, TimeLineContext } from "./TimeLineReducer";
 
-const TimeLineItem = ({ date, title, description, id }) => {
+const TimeLineItem = ({
+  date,
+  title,
+  description,
+  id,
+  onRemove = () => {},
+}) => {
   const [state, dispatch] = useContext(TimeLineContext);
 
   return (
@@ -17,7 +23,10 @@ const TimeLineItem = ({ date, title, description, id }) => {
       <div className="flex justify-end w-full">
         <FaEraser
           className="cursor-pointer hover:text-red-600"
-          onClick={() => dispatch({ type: REMOVE_TIMELINE, payload: id })}
+          onClick={() => {
+            onRemove();
+            dispatch({ type: REMOVE_TIMELINE, payload: id });
+          }}
         />
       </div>
     </li>

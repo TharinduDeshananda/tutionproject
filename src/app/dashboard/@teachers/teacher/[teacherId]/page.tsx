@@ -38,7 +38,7 @@ async function TeacherProfilePage({
       <div className="mx-1 mt-5 text-xs font-bold text-gray-700 sm:text-sm md:text-base sm:mx-2">
         Education qualifications
       </div>
-      <TimeLineComponent />
+      <TimeLineComponent userEmail={user.email} />
     </div>
   );
 }

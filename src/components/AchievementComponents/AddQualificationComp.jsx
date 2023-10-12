@@ -3,7 +3,11 @@ import React, { useContext, useEffect, useState } from "react";
 import { ADD_TIMELINE, TimeLineContext } from "./TimeLineReducer";
 import { useFormik } from "formik";
 
-function AddQualificationComp({ onCancel = () => {}, qualificationId }) {
+function AddQualificationComp({
+  onCancel = () => {},
+  qualificationId,
+  setApply = (value) => {},
+}) {
   const [state = [], dispatch] = useContext(TimeLineContext);
   const [itemState, setItemState] = useState({
     id: 0,
@@ -14,6 +18,7 @@ function AddQualificationComp({ onCancel = () => {}, qualificationId }) {
   const formik = useFormik({
     initialValues: itemState,
     onSubmit: (values) => {
+      setApply(true);
       dispatch({ type: ADD_TIMELINE, payload: values });
     },
     validate: (values) => {
