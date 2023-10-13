@@ -6,7 +6,13 @@ import { FaPencilAlt } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-function UserProfileDescriptionComp({ description }: { description: string }) {
+function UserProfileDescriptionComp({
+  description,
+  isUser = false,
+}: {
+  description: string;
+  isUser: boolean;
+}) {
   const [showModal, setShowModal] = useState(false);
   const [currentText, setCurrentText] = useState(testQuote);
   const textAreaRef = useRef(null);
@@ -46,14 +52,16 @@ function UserProfileDescriptionComp({ description }: { description: string }) {
     <>
       <div className="relative p-1 mx-1 text-xs bg-white shadow-md sm:p-3 md:p-5 sm:text-sm xl:text-base">
         <div className="text-justify">{currentText}</div>
-        <div
-          onClick={() => setShowModal((c) => !c)}
-          className="absolute right-2 bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center"
-        >
-          <FaPencilAlt className="text-white" />
-        </div>
+        {isUser && (
+          <div
+            onClick={() => setShowModal((c) => !c)}
+            className="absolute right-2 bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center"
+          >
+            <FaPencilAlt className="text-white" />
+          </div>
+        )}
       </div>
-      {showModal && (
+      {isUser && showModal && (
         <CustomModal>
           <div className="flex flex-col items-center gap-5">
             <textarea

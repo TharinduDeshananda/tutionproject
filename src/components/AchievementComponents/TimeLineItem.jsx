@@ -9,6 +9,7 @@ const TimeLineItem = ({
   description,
   id,
   onRemove = () => {},
+  isUser = false,
 }) => {
   const [state, dispatch] = useContext(TimeLineContext);
 
@@ -20,15 +21,17 @@ const TimeLineItem = ({
       </time>
       <h3 className="text-lg font-semibold text-gray-900 ">{title}</h3>
       <p className="text-base font-normal text-gray-500 ">{description}</p>
-      <div className="flex justify-end w-full">
-        <FaEraser
-          className="cursor-pointer hover:text-red-600"
-          onClick={() => {
-            onRemove();
-            dispatch({ type: REMOVE_TIMELINE, payload: id });
-          }}
-        />
-      </div>
+      {isUser && (
+        <div className="flex justify-end w-full">
+          <FaEraser
+            className="cursor-pointer hover:text-red-600"
+            onClick={() => {
+              onRemove();
+              dispatch({ type: REMOVE_TIMELINE, payload: id });
+            }}
+          />
+        </div>
+      )}
     </li>
   );
 };

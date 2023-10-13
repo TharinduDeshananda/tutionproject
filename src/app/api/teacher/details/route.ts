@@ -66,6 +66,7 @@ export async function PATCH(req: NextRequest) {
     const dtos: TeacherQualificationDto[] = [];
     console.log(body.length);
     body.forEach((element) => {
+      delete element["_id"];
       dtos.push(plainToInstance(TeacherQualificationDto, element));
     });
     const dto = new TeacherDetailsDto();

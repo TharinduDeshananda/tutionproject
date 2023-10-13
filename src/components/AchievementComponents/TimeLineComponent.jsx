@@ -9,7 +9,7 @@ import AddQualificationComp from "./AddQualificationComp";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import Spin from "@/util/Spin";
-function TimeLineComponent({ userEmail = "" }) {
+function TimeLineComponent({ userEmail = "", isUser = false }) {
   const [state, dispatch] = useReducer(timeLineReducer, []);
   const [apply, setApply] = useState(false);
 
@@ -27,7 +27,7 @@ function TimeLineComponent({ userEmail = "" }) {
         throw new Error("Qualifications fetch failed: " + body.message);
       console.log(body);
 
-      return body.body.qualifications;
+      return body?.body?.qualifications ?? [];
     },
     cacheTime: 0,
   });
@@ -69,16 +69,19 @@ function TimeLineComponent({ userEmail = "" }) {
           show={qualificationsQuery.isLoading}
           label="Loading qualifications"
         />
-        <button
-          className="text-xs cursor-pointer generic-button-primary disabled:bg-gray-500 "
-          disabled={!apply}
-          onClick={() => {
-            submitMutation.mutate(state);
-            setApply(false);
-          }}
-        >
-          Apply
-        </button>
+        {isUser && (
+          <button
+            className="text-xs cursor-pointer generic-button-primary disabled:bg-gray-500 "
+            disabled={!apply}
+            onClick={() => {
+              submitMutation.mutate(state);
+              setApply(false);
+            }}
+          >
+            Apply
+          </button>
+        )}
+
         {(!state || state.length === 0) && (
           <span className="mx-1 font-bold text-gray-500 sm:mx-2">
             No Qualifications added
@@ -88,6 +91,7 @@ function TimeLineComponent({ userEmail = "" }) {
           <ol className="relative border-l border-gray-700 ">
             {state.map((i) => (
               <TimeLineItem
+                isUser={isUser}
                 key={i.id}
                 date={i.date}
                 description={i.description}
@@ -99,16 +103,18 @@ function TimeLineComponent({ userEmail = "" }) {
               />
             ))}
           </ol>
-          <div
-            className="flex items-center justify-center w-full py-2 cursor-pointer hover:text-white hover:bg-blue-500"
-            onClick={() => {
-              setQualificationId(0);
-            }}
-          >
-            <FaPlusCircle />
-          </div>
+          {isUser && (
+            <div
+              className="flex items-center justify-center w-full py-2 cursor-pointer hover:text-white hover:bg-blue-500"
+              onClick={() => {
+                setQualificationId(0);
+              }}
+            >
+              <FaPlusCircle />
+            </div>
+          )}
         </div>
-        {qualificationId !== null && qualificationId >= 0 && (
+        {isUser && qualificationId !== null && qualificationId >= 0 && (
           <CustomModal>
             <AddQualificationComp
               qualificationId={qualificationId}

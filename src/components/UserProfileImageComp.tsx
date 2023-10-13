@@ -9,7 +9,7 @@ type MutationType = {
   data: Blob;
   mType: string;
 };
-function UserProfileImageComp({ avatarUrl, profileImageUrl }) {
+function UserProfileImageComp({ avatarUrl, profileImageUrl, isUser = false }) {
   const imgMutation = useMutation({
     mutationKey: ["imgUpload"],
     mutationFn: async (value: MutationType) => {
@@ -22,6 +22,7 @@ function UserProfileImageComp({ avatarUrl, profileImageUrl }) {
       const body = await response.json();
       if (!response.ok || body.status !== 0) throw new Error(body.message);
     },
+
     onSuccess: () => {
       toast.success("Upload success");
     },
@@ -72,35 +73,43 @@ function UserProfileImageComp({ avatarUrl, profileImageUrl }) {
               className="object-cover"
               fill
             />
-            <div className="absolute left-1/2 transform -translate-x-1/2  bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center">
-              <label htmlFor="avatarImgId" className="cursor-pointer">
+            {isUser && (
+              <div className="absolute left-1/2 transform -translate-x-1/2  bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center">
+                <label htmlFor="avatarImgId" className="cursor-pointer">
+                  <FaPencilAlt className="text-white" />
+                </label>
+              </div>
+            )}
+          </div>
+
+          {isUser && (
+            <div className="absolute right-2 bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center">
+              <label htmlFor="profileImgId" className="cursor-pointer">
                 <FaPencilAlt className="text-white" />
               </label>
             </div>
-          </div>
-
-          <div className="absolute right-2 bottom-2 bg-[rgba(0,0,0,0.8)] cursor-pointer p-1 rounded-md flex items-center justify-center">
-            <label htmlFor="profileImgId" className="cursor-pointer">
-              <FaPencilAlt className="text-white" />
-            </label>
-          </div>
+          )}
         </div>
-        <input
-          type="file"
-          accept="image/*"
-          name="profileImg"
-          id="profileImgId"
-          className="hidden"
-          onChange={handleProfileImgChange}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          name="avatarImg"
-          id="avatarImgId"
-          className="hidden"
-          onChange={handleAvatarImgChange}
-        />
+        {isUser && (
+          <input
+            type="file"
+            accept="image/*"
+            name="profileImg"
+            id="profileImgId"
+            className="hidden"
+            onChange={handleProfileImgChange}
+          />
+        )}
+        {isUser && (
+          <input
+            type="file"
+            accept="image/*"
+            name="avatarImg"
+            id="avatarImgId"
+            className="hidden"
+            onChange={handleAvatarImgChange}
+          />
+        )}
       </form>
     </div>
   );
