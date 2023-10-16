@@ -36,10 +36,12 @@ function SideBar() {
           <FaUsers />
         </SideBarItem>
       </Link>
+      <Link href={"/dashboard/assignment"} className="w-full">
+        <SideBarItem title="Assignments">
+          <FaBook />
+        </SideBarItem>
+      </Link>
 
-      <SideBarItem title="Assignments">
-        <FaBook />
-      </SideBarItem>
       <SideBarItem title="Quizes">
         <FaQuestionCircle />
       </SideBarItem>

@@ -13,6 +13,7 @@ type PropType = {
   value?: string;
   options?: SelectType[];
   required?: boolean;
+  inputStyle?: React.CSSProperties;
 };
 
 function CustomSelectField({
@@ -23,9 +24,11 @@ function CustomSelectField({
   value = "",
   options = [],
   required = false,
+  inputStyle = {},
 }: PropType) {
   return (
     <select
+      style={inputStyle}
       id={inputName}
       name={inputName}
       value={value}

@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { Document, PipelineStage } from "mongoose";
+import mongoose, { Document, PipelineStage, mongo } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import { TeacherFilter } from "src/app/api/teacher/route";
@@ -158,6 +158,39 @@ export async function getTeacherDetails(
     return user.details;
   } catch (error) {
     console.error("Method getTeacherDetails failed: ", error);
+    throw error;
+  }
+}
+
+export async function getTeacherClassRoomCodes(
+  teacherId: string,
+  year: number
+): Promise<string[]> {
+  try {
+    console.log("method getTeacherClassRoomCodes start ", teacherId);
+    const codes = await db.ClassRoomEntity.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherdetails",
+        },
+      },
+      {
+        $match: {
+          teacherdetails: {
+            $elemMatch: { _id: new mongoose.Types.ObjectId(teacherId) },
+          },
+          year: year,
+        },
+      },
+      { $project: { classCode: 1 } },
+    ]);
+
+    return codes;
+  } catch (error) {
+    console.error("Method getTeacherClassRoomCodes failed: ", error);
     throw error;
   }
 }
