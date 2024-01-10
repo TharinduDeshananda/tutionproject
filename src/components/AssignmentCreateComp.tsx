@@ -6,8 +6,9 @@ import MultiFileUploadField from "./MultiFileUploadField";
 import { useFormik } from "formik";
 import CustomTextArea from "./CustomTextArea";
 import Spin from "@/util/Spin";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import { json } from "stream/consumers";
 
 type PropType = {
   teacherId: string;
@@ -38,6 +39,18 @@ function AssignmentCreateComp({ teacherId }: PropType) {
     status: "OPEN",
     year: new Date().getFullYear(),
   };
+
+  const submitMutation = useMutation({
+    mutationKey: ["assignment"],
+    mutationFn: async (values: FormType) => {
+      const response = await fetch("/api/assignment", {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
+      const body = await response.json();
+      if (!response.ok || body.status !== 0) throw new Error(body.message);
+    },
+  });
   const formik = useFormik<FormType>({
     initialValues: initValues,
     onSubmit: (values) => {

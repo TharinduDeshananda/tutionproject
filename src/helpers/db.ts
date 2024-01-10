@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { getClassAssignmentModel } from "src/models/ClassAssignmentModel";
 import { getClassRoomModel } from "src/models/ClassRoomModel";
 import { getGradeModel } from "src/models/GradeModel";
 import { getSubjectModel } from "src/models/SubjectModel";
@@ -13,4 +14,5 @@ export const db = {
   SubjectEntity: getSubjectModel(),
   GradeEntity: getGradeModel(),
   ClassRoomEntity: getClassRoomModel(),
+  AssignmentEntity: getClassAssignmentModel(),
 };
