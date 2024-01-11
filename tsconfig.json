@@ -20,21 +20,35 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
-      "@/components/*": ["src/components/*"],
-      "@/constants": ["src/constants"],
-      "../components/*": ["src/components/*"],
-      "../constants": ["src/constants"],
-      "@/util/*": ["src/util/*"],
-      "@/wrappers/*": ["src/wrappers/*"],
-      "../wrappers": ["src/wrappers"],
-      
+      "@/components/*": [
+        "src/components/*"
+      ],
+      "@/constants": [
+        "src/constants"
+      ],
+      "../components/*": [
+        "src/components/*"
+      ],
+      "../constants": [
+        "src/constants"
+      ],
+      "@/util/*": [
+        "src/util/*"
+      ],
+      "@/wrappers/*": [
+        "src/wrappers/*"
+      ],
+      "../wrappers": [
+        "src/wrappers"
+      ]
       // Add more aliases as needed
     },
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",

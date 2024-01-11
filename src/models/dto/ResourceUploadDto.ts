@@ -11,4 +11,5 @@ export class FileUploadType {
   size?: number;
   date?: Date;
   owner?: UserDto;
+  url?: string;
 }

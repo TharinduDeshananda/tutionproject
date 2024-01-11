@@ -14,11 +14,6 @@ function ClassResourcesComp({ roomId }: PropType) {
       <PaginationComp currentPage={5} pageCount={10} />
       <div className="flex flex-col gap-5">
         <ClassRoomResourceCard />
-        <ClassRoomResourceCard />
-        <ClassRoomResourceCard />
-        <ClassRoomResourceCard />
-        <ClassRoomResourceCard />
-        <ClassRoomResourceCard />
       </div>
     </div>
   );

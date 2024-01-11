@@ -120,7 +120,7 @@ export async function createClassRoom(
 export async function updateClassRoom(dto: ClassRoomDto) {
   try {
     console.log("method updateClassRoom start");
-    const existingClass: Document = await db.ClassRoomEntity.findById(dto.id);
+    const existingClass = await db.ClassRoomEntity.findById(dto.id);
     if (!existingClass) throw new Error("Class Room Not found");
     if (dto.classCode) existingClass.set("classCode", dto.classCode);
     if (dto.className) existingClass.set("className", dto.className);
