@@ -155,7 +155,8 @@ export async function getClassRoomById(id: string): Promise<ClassRoomDto> {
     const room = await db.ClassRoomEntity.findById(id)
       .populate("grade")
       .populate("subject")
-      .populate("teacher");
+      .populate("teacher")
+      .populate("resources");
     if (!room) throw new Error("Class room not found");
     return room;
   } catch (error) {

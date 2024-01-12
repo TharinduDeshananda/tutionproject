@@ -10,14 +10,15 @@ import AddResourceComp from "@/components/classroom/AddResourceComp";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import { getClassRoomByClassRoomIdQuery } from "src/queries/classroom/ClassRoomQueries";
 import LoadingComp from "@/components/loadingcomp/LoadingComp";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
-function TeacherClassRoom({ searchParams }) {
-  const params = useSearchParams();
+function TeacherClassRoom() {
+  const searchParams = useSearchParams();
+  const pathParams = useParams();
 
-  const showResourceAddModal = params?.get("resourceadd");
+  const showResourceAddModal = searchParams?.get("resourceadd");
 
-  const id = "659d6d37a536048dff5c23ab";
+  const id = (pathParams?.room ?? "") as string;
   const isLoading = useIsFetching();
 
   const classRoomQuery = useQuery({
@@ -26,6 +27,7 @@ function TeacherClassRoom({ searchParams }) {
       try {
         const roomId = queryKey[1];
         const room = await getClassRoomByClassRoomIdQuery(roomId);
+        console.log(room);
         return room;
       } catch (error) {
         console.error("failed fetching class room", error);
@@ -34,7 +36,12 @@ function TeacherClassRoom({ searchParams }) {
     },
   });
 
-  if (isLoading > 0) <LoadingComp />;
+  if (isLoading > 0)
+    return (
+      <div className="flex items-center justify-center min-h-screen ">
+        <LoadingComp />
+      </div>
+    );
   if (classRoomQuery.isError)
     return (
       <div className="w-full min-h-[500px] flex justify-center items-center flex-col">
@@ -87,11 +94,13 @@ function TeacherClassRoom({ searchParams }) {
             </p>
           </div>
           {/* class resources */}
-          <ClassResourcesComp />
+          <ClassResourcesComp
+            resources={classRoomQuery.data?.resources ?? []}
+          />
         </div>
         {showResourceAddModal && (
           <CustomModal>
-            <AddResourceComp />
+            <AddResourceComp roomId={id} />
           </CustomModal>
         )}
       </>

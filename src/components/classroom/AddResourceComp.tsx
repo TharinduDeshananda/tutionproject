@@ -18,7 +18,7 @@ type FormType = {
 };
 
 function AddResourceComp({ roomId }: PropType) {
-  const [fileList, setFileList] = useState<Blob[]>([]);
+  const [fileList, setFileList] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
   const formik = useFormik<FormType>({
     initialValues: { description: "", resourceName: "", resourceFiles: [] },
@@ -29,11 +29,12 @@ function AddResourceComp({ roomId }: PropType) {
   });
 
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
-    const files: FileList = e.currentTarget.files;
-    const newFileList: Blob[] = [];
-    for (let i = 0; i < files.length; ++i) {
+    const files: FileList | null = e.currentTarget.files;
+    if (!files) return;
+    const newFileList: File[] = [];
+    for (let i = 0; i < files?.length; ++i) {
       const item = files.item(i);
-      newFileList.push(item);
+      if (item) newFileList.push(item);
     }
     if (newFileList) setFileList(newFileList);
     formik.handleChange(e);
@@ -42,8 +43,8 @@ function AddResourceComp({ roomId }: PropType) {
   const formMutation = useMutation({
     mutationFn: async (values: FormType) => {
       const formData = new FormData();
-      formData.append("description", values.description);
-      formData.append("resourceName", values.resourceName);
+      formData.append("description", values.description ?? "");
+      formData.append("resourceName", values.resourceName ?? "");
 
       fileList.forEach((item) => {
         formData.append("resourceFiles", item, item.name);
