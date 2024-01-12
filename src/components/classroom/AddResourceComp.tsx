@@ -6,9 +6,10 @@ import CustomInputField from "../CustomInputField";
 import CustomTextArea from "../CustomTextArea";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import LoadingComp from "../loadingcomp/LoadingComp";
 
 type PropType = {
-  roomId?: string;
+  roomId: string;
 };
 
 type FormType = {
@@ -45,12 +46,13 @@ function AddResourceComp({ roomId }: PropType) {
       const formData = new FormData();
       formData.append("description", values.description ?? "");
       formData.append("resourceName", values.resourceName ?? "");
+      formData.append("classId", roomId);
 
       fileList.forEach((item) => {
         formData.append("resourceFiles", item, item.name);
       });
 
-      const response = await fetch("/api/classroom/resource", {
+      const response = await fetch("/api/classroom/resourceupload/upload", {
         method: "POST",
         body: formData,
       });
@@ -68,6 +70,12 @@ function AddResourceComp({ roomId }: PropType) {
   return (
     <div className="w-full">
       <form action="" onSubmit={formik.handleSubmit}>
+        {formMutation.isLoading && (
+          <div className="flex flex-col items-center justify-center w-full">
+            <h1>Uploading...</h1>
+            <LoadingComp />
+          </div>
+        )}
         <div className="text-base font-bold text-gray-500">
           Upload your resource files here
         </div>
