@@ -12,7 +12,7 @@ const initialValues = {
 };
 
 function LoginPage() {
-  const errorNavigation = useSearchParams().get("error");
+  const errorNavigation = useSearchParams()?.get("error");
 
   const formik = useFormik({
     initialValues: initialValues,

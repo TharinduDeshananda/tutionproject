@@ -29,7 +29,7 @@ export const authOptions = {
 
           const user: UserDto = await findUserByEmail(userName);
 
-          if (user && (await verifyPassword(password, user.password))) {
+          if (user && (await verifyPassword(password, user?.password ?? ""))) {
             return {
               email: user.email,
               name: user.firstName + " " + user.lastName,
