@@ -1,3 +1,4 @@
+import ClassRoomDto from "./ClassRoomDto";
 import UserDto from "./UserDto";
 
 export default class ResourceUploadDto {

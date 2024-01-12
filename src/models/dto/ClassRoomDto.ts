@@ -1,4 +1,5 @@
 import GradeDto from "./GradeDto";
+import ResourceUploadDto from "./ResourceUploadDto";
 import SubjectDto from "./SubjectDto";
 import UserDto from "./UserDto";
 
@@ -13,4 +14,5 @@ export default class ClassRoomDto {
   public students?: UserDto[];
   public description?: string;
   public timeString?: string;
+  resources?: ResourceUploadDto[];
 }

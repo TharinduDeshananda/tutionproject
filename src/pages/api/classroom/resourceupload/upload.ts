@@ -1,13 +1,13 @@
 import multer from "multer";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { createRouter, expressWrapper } from "next-connect";
+
+import { createRouter } from "next-connect";
 import { Request, Response } from "express";
 import fs from "fs";
 import ResourceUploadDto, {
   FileUploadType,
 } from "src/models/dto/ResourceUploadDto";
 import { db } from "src/helpers/db";
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { uploadFileToS3Stream } from "@/util/s3client/FileUpload";
 import { ManagedUpload } from "aws-sdk/clients/s3";
 
@@ -44,6 +44,8 @@ router.post(async (req, res, next) => {
     const result = await new Promise((resolve, reject) => {
       //file handling promise start
       upload.any()(req as Request, res, async (err: any) => {
+        const mongooseSession = await mongoose.startSession();
+        mongooseSession.startTransaction();
         try {
           if (err) {
             reject(err);
@@ -60,12 +62,18 @@ router.post(async (req, res, next) => {
           // console.log(files);
 
           // Access other fields from the request body
-          const { resourceName, description } = await req.body;
+          const { resourceName, description, classId } = await req.body;
           if (!resourceName) throw new Error("Resource name is required");
+          if (!classId) throw new Error("Class id is required");
 
+          //create resource upload document with minimum data
           const resourceUpload: Document<ResourceUploadDto> =
             new db.ResourceUploadEntity({ resourceName, description });
           await resourceUpload.save();
+
+          //get classRoom document
+          const classRoom = await db.ClassRoomEntity.exists({ _id: classId });
+          if (!classRoom) throw new Error("class room not found");
 
           const locations: {
             location: ManagedUpload.SendData;
@@ -100,6 +108,17 @@ router.post(async (req, res, next) => {
           resourceUpload.set("fileUploads", fileUploads);
           await resourceUpload.save();
 
+          //add uploaded resource to class room
+          const classRoomUpdateResult = await db.ClassRoomEntity.updateOne(
+            { _id: classId },
+            { $push: { resources: resourceUpload._id } }
+          );
+          if (
+            !classRoomUpdateResult ||
+            classRoomUpdateResult.modifiedCount === 0
+          )
+            throw new Error("Resource addition to class room failed");
+
           // Process the files and other fields as needed
           // In this example, we are sending back information about the uploaded files and fields as a response.
           const fileData = [];
@@ -112,7 +131,10 @@ router.post(async (req, res, next) => {
             },
           });
         } catch (error) {
+          mongooseSession.abortTransaction();
           reject(error);
+        } finally {
+          mongooseSession.endSession();
         }
       });
 

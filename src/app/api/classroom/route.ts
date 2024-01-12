@@ -38,17 +38,17 @@ export async function GET(req: NextRequest) {
     const body = req.nextUrl.searchParams;
 
     console.log(body);
-    const page = parseInt(body.get("page") ? body.get("page") : "0");
-    const size = parseInt(body.get("size") ? body.get("size") : "0");
+    const page = parseInt(body.get("page") ?? "0");
+    const size = parseInt(body.get("size") ?? "0");
 
     const filter: ClassFilterationDto = {};
-    if (body.get("className")) filter.className = body.get("className");
-    if (body.get("classCode")) filter.classCode = body.get("classCode");
-    if (body.get("grade")) filter.grade = body.get("grade");
-    if (body.get("subject")) filter.subject = body.get("subject");
-    if (body.get("year") && parseInt(body.get("year")))
-      filter.year = parseInt(body.get("year"));
-    if (body.get("teacher")) filter.teacher = body.get("teacher");
+    if (body.get("className")) filter.className = body.get("className") ?? "";
+    if (body.get("classCode")) filter.classCode = body.get("classCode") ?? "";
+    if (body.get("grade")) filter.grade = body.get("grade") ?? "";
+    if (body.get("subject")) filter.subject = body.get("subject") ?? "";
+    if (body.get("year") && parseInt(body.get("year") ?? "0"))
+      filter.year = parseInt(body.get("year") ?? "0");
+    if (body.get("teacher")) filter.teacher = body.get("teacher") ?? "";
     console.log(filter);
     const rooms = await getClassRoomsFiltered(filter, page, size);
 

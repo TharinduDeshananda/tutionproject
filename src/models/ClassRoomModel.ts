@@ -11,7 +11,7 @@ const classRoomSchema = new Schema<ClassRoomDto>(
     year: { type: Number, required: true, min: 2000, max: 2100 },
     teacher: { type: mongoose.Types.ObjectId, ref: "User" },
     students: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-
+    resources: [{ type: mongoose.Types.ObjectId, ref: "ResourceUpload" }],
     timeString: String,
   },
   { timestamps: true }
