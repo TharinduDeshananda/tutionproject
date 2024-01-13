@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import CustomModal from "@/components/modalcomp/CustomModal";
 import Link from "next/link";
 import { getClassRoomById } from "src/services/ClassRoomService";
@@ -8,11 +8,16 @@ import ClassRoomDto from "src/models/dto/ClassRoomDto";
 import ClassResourcesComp from "@/components/classroom/ClassResourcesComp";
 import AddResourceComp from "@/components/classroom/AddResourceComp";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
-import { getClassRoomByClassRoomIdQuery } from "src/queries/classroom/ClassRoomQueries";
+import {
+  getClassRoomByClassRoomIdQuery,
+  getClassRoomResourcesQuery,
+} from "src/queries/classroom/ClassRoomQueries";
 import LoadingComp from "@/components/loadingcomp/LoadingComp";
 import { useParams, useSearchParams } from "next/navigation";
+import PaginationCompWithCallback from "@/components/NewPaginationComp/PaginationCompWithCallback";
 
 function TeacherClassRoom() {
+  const [currentPage, setCurrentPage] = useState(1);
   const searchParams = useSearchParams();
   const pathParams = useParams();
 
@@ -27,12 +32,25 @@ function TeacherClassRoom() {
       try {
         const roomId = queryKey[1];
         const room = await getClassRoomByClassRoomIdQuery(roomId);
-        console.log(room);
         return room;
       } catch (error) {
         console.error("failed fetching class room", error);
         throw error;
       }
+    },
+  });
+
+  const classRoomResourcesQuery = useQuery({
+    queryKey: ["classroom", "resources", id, currentPage],
+    queryFn: async ({ queryKey }) => {
+      const roomId = queryKey[2];
+      const page = queryKey[3];
+      const resources = await getClassRoomResourcesQuery(
+        roomId as unknown as string,
+        parseInt(page as string),
+        10
+      );
+      return resources;
     },
   });
 
@@ -94,8 +112,19 @@ function TeacherClassRoom() {
             </p>
           </div>
           {/* class resources */}
+          <h1 className="px-1 text-sm sm:px-5 sm:text-lg">Resources</h1>
+          <PaginationCompWithCallback
+            onClickPage={(pageNumber: number) => {
+              setCurrentPage(pageNumber);
+            }}
+            currentPage={currentPage}
+            totalPages={10}
+            perPage={10}
+          />
           <ClassResourcesComp
-            resources={classRoomQuery.data?.resources ?? []}
+            resources={classRoomResourcesQuery.data?.map(
+              (item: { resourcesList: any }) => item.resourcesList
+            )}
           />
         </div>
         {showResourceAddModal && (

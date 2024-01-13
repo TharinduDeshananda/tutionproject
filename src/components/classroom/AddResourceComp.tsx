@@ -4,9 +4,10 @@ import Link from "next/link";
 import React, { ChangeEvent, useState } from "react";
 import CustomInputField from "../CustomInputField";
 import CustomTextArea from "../CustomTextArea";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import LoadingComp from "../loadingcomp/LoadingComp";
+import ProgressBar from "../progresscomp/ProgressBar ";
 
 type PropType = {
   roomId: string;
@@ -19,8 +20,10 @@ type FormType = {
 };
 
 function AddResourceComp({ roomId }: PropType) {
+  const queryClient = useQueryClient();
   const [fileList, setFileList] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
   const formik = useFormik<FormType>({
     initialValues: { description: "", resourceName: "", resourceFiles: [] },
     onSubmit: (values) => {
@@ -43,27 +46,58 @@ function AddResourceComp({ roomId }: PropType) {
 
   const formMutation = useMutation({
     mutationFn: async (values: FormType) => {
-      const formData = new FormData();
-      formData.append("description", values.description ?? "");
-      formData.append("resourceName", values.resourceName ?? "");
-      formData.append("classId", roomId);
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("description", values.description ?? "");
+        formData.append("resourceName", values.resourceName ?? "");
+        formData.append("classId", roomId);
 
-      fileList.forEach((item) => {
-        formData.append("resourceFiles", item, item.name);
-      });
+        fileList.forEach((item) => {
+          formData.append("resourceFiles", item, item.name);
+        });
 
-      const response = await fetch("/api/classroom/resourceupload/upload", {
-        method: "POST",
-        body: formData,
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const localProgress = (event.loaded / event.total) * 100;
+            // Update your progress UI or log the progress as needed
+            console.log(`Upload Progress: ${progress.toFixed(2)}%`);
+            setProgress(localProgress);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response);
+            } catch (error) {
+              reject(new Error("Failed to parse response"));
+            }
+          } else {
+            reject(new Error("Failed resource upload"));
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error"));
+        });
+
+        xhr.open("POST", "/api/classroom/resourceupload/upload");
+        setShowProgress(true);
+        xhr.send(formData);
       });
-      if (!response.ok) throw new Error("Failed resource upload");
-      return await response.json();
     },
     onError: (error: Error) => {
       toast.error("Upload failed: " + error.message);
     },
     onSuccess: () => {
       toast.success("Upload success");
+      queryClient.invalidateQueries({ queryKey: ["classroom", roomId] });
+    },
+    onSettled: () => {
+      setShowProgress(false);
     },
   });
 
@@ -148,6 +182,11 @@ function AddResourceComp({ roomId }: PropType) {
             />
           </label>
         </div>
+        {showProgress && (
+          <div className="flex items-center justify-center w-full generic-padding ">
+            <ProgressBar progress={progress} />
+          </div>
+        )}
         <div className="flex justify-around w-full px-1 my-2 sm:px-2 md:px-5">
           <Link href={"?"}>
             <input

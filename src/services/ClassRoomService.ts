@@ -1,6 +1,7 @@
 import { classRooms } from "@/constants";
-import { Document, FilterQuery } from "mongoose";
+import mongoose, { Document, FilterQuery } from "mongoose";
 import { getServerSession } from "next-auth";
+import { skip } from "node:test";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import UserRole from "src/enum/UserRole";
 import { db } from "src/helpers/db";
@@ -162,5 +163,38 @@ export async function getClassRoomById(id: string): Promise<ClassRoomDto> {
   } catch (error) {
     console.log("method getClassRoomById failed: ", error);
     throw error;
+  }
+}
+
+export async function getClassRoomResourcesPaged(
+  classRoomId: string,
+  page: number = 1,
+  size = 10
+) {
+  try {
+    console.log("method getClassRoomResourcesPaged start: ", classRoomId);
+
+    const result = await db.ClassRoomEntity.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(classRoomId) } },
+      {
+        $lookup: {
+          as: "resourcesList",
+          localField: "resources",
+          foreignField: "_id",
+          from: "resourceuploads",
+        },
+      },
+      { $project: { resourcesList: 1 } },
+      { $unwind: { path: "$resourcesList" } },
+      { $sort: { "resourcesList.createdAt": -1 } },
+      { $skip: (page - 1) * size },
+      { $limit: size },
+    ]);
+
+    console.log("method getClassRoomResourcesPaged success: ", classRoomId);
+    return result;
+  } catch (error) {
+    console.error(error);
+    console.error("method getClassRoomResourcesPaged failed: ", error);
   }
 }
