@@ -187,8 +187,12 @@ export async function getClassRoomResourcesPaged(
       { $project: { resourcesList: 1 } },
       { $unwind: { path: "$resourcesList" } },
       { $sort: { "resourcesList.createdAt": -1 } },
-      { $skip: (page - 1) * size },
-      { $limit: size },
+      {
+        $facet: {
+          count: [{ $count: "documentCount" }],
+          result: [{ $skip: (page - 1) * size }, { $limit: size }],
+        },
+      },
     ]);
 
     console.log("method getClassRoomResourcesPaged success: ", classRoomId);

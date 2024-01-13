@@ -94,7 +94,9 @@ function AddResourceComp({ roomId }: PropType) {
     },
     onSuccess: () => {
       toast.success("Upload success");
-      queryClient.invalidateQueries({ queryKey: ["classroom", roomId] });
+      queryClient.invalidateQueries({
+        queryKey: ["classroom", "resources", roomId],
+      });
     },
     onSettled: () => {
       setShowProgress(false);

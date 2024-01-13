@@ -18,9 +18,12 @@ export async function getClassRoomResourcesQuery(
 ) {
   try {
     if (!id) throw new Error("Id is required");
-    const response = await fetch("/api/classroom/" + id + "/resources", {
-      method: "GET",
-    });
+    const response = await fetch(
+      "/api/classroom/" + id + "/resources?page=" + page,
+      {
+        method: "GET",
+      }
+    );
     const body = await response.json();
     if (body.status !== 0) throw new Error(body.body);
     return body.body;

@@ -7,7 +7,9 @@ export async function GET(
 ) {
   try {
     const classId = params.id;
-    const result = await getClassRoomResourcesPaged(classId);
+    const page = request.nextUrl.searchParams.get("page") ?? "1";
+
+    const result = await getClassRoomResourcesPaged(classId, parseInt(page));
 
     return NextResponse.json({ status: 0, message: "success", body: result });
   } catch (error) {

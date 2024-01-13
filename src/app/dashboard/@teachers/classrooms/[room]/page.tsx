@@ -3,11 +3,10 @@
 import React, { useState } from "react";
 import CustomModal from "@/components/modalcomp/CustomModal";
 import Link from "next/link";
-import { getClassRoomById } from "src/services/ClassRoomService";
-import ClassRoomDto from "src/models/dto/ClassRoomDto";
+
 import ClassResourcesComp from "@/components/classroom/ClassResourcesComp";
 import AddResourceComp from "@/components/classroom/AddResourceComp";
-import { useIsFetching, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   getClassRoomByClassRoomIdQuery,
   getClassRoomResourcesQuery,
@@ -18,13 +17,13 @@ import PaginationCompWithCallback from "@/components/NewPaginationComp/Paginatio
 
 function TeacherClassRoom() {
   const [currentPage, setCurrentPage] = useState(1);
+
   const searchParams = useSearchParams();
   const pathParams = useParams();
 
   const showResourceAddModal = searchParams?.get("resourceadd");
 
   const id = (pathParams?.room ?? "") as string;
-  const isLoading = useIsFetching();
 
   const classRoomQuery = useQuery({
     queryKey: ["classroom", id],
@@ -54,7 +53,7 @@ function TeacherClassRoom() {
     },
   });
 
-  if (isLoading > 0)
+  if (classRoomQuery.isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen ">
         <LoadingComp />
@@ -113,19 +112,48 @@ function TeacherClassRoom() {
           </div>
           {/* class resources */}
           <h1 className="px-1 text-sm sm:px-5 sm:text-lg">Resources</h1>
-          <PaginationCompWithCallback
-            onClickPage={(pageNumber: number) => {
-              setCurrentPage(pageNumber);
-            }}
-            currentPage={currentPage}
-            totalPages={10}
-            perPage={10}
-          />
-          <ClassResourcesComp
-            resources={classRoomResourcesQuery.data?.map(
-              (item: { resourcesList: any }) => item.resourcesList
+          {classRoomResourcesQuery.isLoading && (
+            <div className="w-full flex flex-col justify-center items-center min-h-[300px]">
+              <LoadingComp />
+            </div>
+          )}
+          {classRoomResourcesQuery.isError && (
+            <div className="w-full flex flex-col justify-center items-center min-h-[300px]">
+              <div>Could not load resources</div>
+            </div>
+          )}
+          {classRoomResourcesQuery.isSuccess &&
+            !classRoomResourcesQuery?.data?.[0]?.count?.[0]?.documentCount && (
+              <div className="w-full flex flex-col justify-center items-center min-h-[300px]">
+                <div>No resources available</div>
+              </div>
             )}
-          />
+          {classRoomResourcesQuery.isSuccess &&
+            classRoomResourcesQuery?.data?.[0]?.count?.[0]?.documentCount && (
+              <>
+                <PaginationCompWithCallback
+                  onClickPage={(pageNumber: number) => {
+                    setCurrentPage(pageNumber);
+                  }}
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(
+                    (classRoomResourcesQuery.data?.[0]?.count?.[0]
+                      ?.documentCount ?? 0) / 10
+                  )}
+                  perPage={10}
+                />
+                <h1 className="py-2 pl-3 text-xs text-gray-500">
+                  Total result:{" "}
+                  {classRoomResourcesQuery.data?.[0]?.count?.[0]
+                    ?.documentCount ?? 0}
+                </h1>
+                <ClassResourcesComp
+                  resources={classRoomResourcesQuery.data?.[0]?.result?.map(
+                    (item: { resourcesList: any }) => item.resourcesList
+                  )}
+                />
+              </>
+            )}
         </div>
         {showResourceAddModal && (
           <CustomModal>

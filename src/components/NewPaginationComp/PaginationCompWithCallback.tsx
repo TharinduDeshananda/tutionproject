@@ -10,12 +10,11 @@ export type PaginationType = {
 };
 
 function PaginationCompWithCallback({
-  currentPage = 0,
+  currentPage = 1,
   totalPages = 0,
-  perPage = 0,
+  perPage = 10,
   onClickPage,
 }: PaginationType) {
-  const navigate = useRouter();
   return (
     <div className="w-full genp">
       <div className="flex flex-row gap-x-3">
