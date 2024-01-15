@@ -96,3 +96,17 @@ export async function saveNotice(dto: NoticeRequestDto) {
     throw error;
   }
 }
+
+export async function getSingleNotice(id: string) {
+  try {
+    console.log("method getSingleNotice start");
+    const notice: NoticeDto | null = await db.NoticeEntity.findById(id)
+      .populate("sender")
+      .exec();
+    if (!notice) throw new Error("Notice not found");
+    return notice;
+  } catch (error) {
+    console.log("method getSingleNotice failed: ", error);
+    throw error;
+  }
+}
