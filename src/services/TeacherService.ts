@@ -119,7 +119,7 @@ export async function handleDetailsChange(request: TeacherDetailsDto) {
 
     const email = session.user.email;
     if (!email) throw new Error("user email not found");
-    const user: Document<UserDto> = await db.UserEntity.findOne({
+    const user: Document<UserDto> | null = await db.UserEntity.findOne({
       email: email,
     });
     if (!user) throw new Error("User not found");
@@ -150,12 +150,12 @@ export async function handleDetailsChange(request: TeacherDetailsDto) {
 
 export async function getTeacherDetails(
   email: string
-): Promise<TeacherDetailsDto> {
+): Promise<TeacherDetailsDto | null | undefined> {
   try {
     console.log("method getTeacherDetails start");
-    const user: UserDto = await db.UserEntity.findOne({ email: email });
+    const user: UserDto | null = await db.UserEntity.findOne({ email: email });
     if (!user) throw new Error("User not found with email: " + email);
-    return user.details;
+    return user?.details;
   } catch (error) {
     console.error("Method getTeacherDetails failed: ", error);
     throw error;

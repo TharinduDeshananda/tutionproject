@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
     const params = request.nextUrl.searchParams;
     const filter: TeacherFilter = {};
     if (params.has("teacherName"))
-      filter.teacherName = params.get("teacherName");
-    if (params.has("className")) filter.className = params.get("className");
+      filter.teacherName = params.get("teacherName") ?? "";
+    if (params.has("className"))
+      filter.className = params.get("className") ?? "";
     if (params.has("classYear"))
       filter.classYear = parseInt(params.get("classYear") ?? "0");
-    if (params.has("subject")) filter.subject = params.get("subject");
-    if (params.has("grade")) filter.grade = params.get("grade");
+    if (params.has("subject")) filter.subject = params.get("subject") ?? "";
+    if (params.has("grade")) filter.grade = params.get("grade") ?? "";
 
     const teachers = await filterTeachers(filter);
 

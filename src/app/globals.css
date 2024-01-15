@@ -75,6 +75,9 @@
   .genh {
     @apply my-2 text-base font-bold text-gray-500 sm:text-lg md:text-2xl;
   }
+  .genm {
+    @apply mx-1 my-5 sm:mx-2 md:mx-5;
+  }
   /* added later*/
 }
 

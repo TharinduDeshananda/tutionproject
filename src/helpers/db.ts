@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { getClassAssignmentModel } from "src/models/ClassAssignmentModel";
 import { getClassRoomModel } from "src/models/ClassRoomModel";
 import { getGradeModel } from "src/models/GradeModel";
+import { getNoticeModel } from "src/models/NoticeModel";
 import { getResourceUploadModel } from "src/models/ResourceUploadModel";
 import { getSubjectModel } from "src/models/SubjectModel";
 
@@ -17,4 +18,5 @@ export const db = {
   ClassRoomEntity: getClassRoomModel(),
   AssignmentEntity: getClassAssignmentModel(),
   ResourceUploadEntity: getResourceUploadModel(),
+  NoticeEntity: getNoticeModel(),
 };

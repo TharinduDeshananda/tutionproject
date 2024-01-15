@@ -31,3 +31,11 @@ export async function getClassRoomResourcesQuery(
     throw error;
   }
 }
+
+export async function getTeacherOwnClassRooms() {
+  const response = await fetch("/api/teacher/classrooms", { method: "GET" });
+  const body = await response.json();
+  if (body.status !== 0)
+    throw new Error("Class rooms fetching failed: ", body.message);
+  return body.body;
+}

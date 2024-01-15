@@ -23,7 +23,7 @@ export async function createUser(userDto: UserDto) {
 export async function updateUser(userDto: UserDto) {
   try {
     console.log("method updateUser start");
-    const updateUser: Document<string, any, UserDto> =
+    const updateUser: Document<string, any, UserDto> | null =
       await db.UserEntity.findById(userDto.id);
     if (!updateUser) throw new Error("User not found");
 

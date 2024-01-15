@@ -2,6 +2,7 @@ import PaginationComp from "@/components/PaginationComp";
 import NoticeComp from "@/components/noticecomponents/NoticeComp";
 import NoticeFilter from "@/components/noticecomponents/NoticeFilter";
 import { testQuote } from "@/constants";
+import Link from "next/link";
 import React from "react";
 
 const item = {
@@ -11,9 +12,14 @@ const item = {
   classRoom: "Class A",
   message: testQuote,
 };
-function NoticePae() {
+function NoticePage() {
   return (
     <div className="w-full">
+      <div className="w-full generic-padding">
+        <Link href="/dashboard/notice/new-notice">
+          <button className="generic-button-primary">Create new Notice</button>
+        </Link>
+      </div>
       <NoticeFilter />
       <PaginationComp
         currentPage={2}
@@ -32,4 +38,4 @@ function NoticePae() {
   );
 }
 
-export default NoticePae;
+export default NoticePage;

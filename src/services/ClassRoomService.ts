@@ -202,3 +202,32 @@ export async function getClassRoomResourcesPaged(
     console.error("method getClassRoomResourcesPaged failed: ", error);
   }
 }
+
+export async function getOwnClassRooms() {
+  try {
+    console.log("method getOwnClassRooms start");
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email;
+    if (!email) throw new Error("unauthorized");
+    console.log(email);
+    const classCodes = await db.ClassRoomEntity.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          as: "teacherObj",
+          localField: "teacher",
+          foreignField: "_id",
+        },
+      },
+      {
+        $match: { "teacherObj.email": email },
+      },
+    ]);
+
+    console.log("method getOwnClassRooms success:");
+    return classCodes;
+  } catch (error) {
+    console.error("method getOwnClassRooms failed: ", error);
+    throw error;
+  }
+}

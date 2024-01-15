@@ -30,11 +30,6 @@ function ClassRoomResourceCard({
           </a>
         ))}
       </div>
-      <div className="flex items-center justify-center p-1">
-        <div className="p-5 text-white bg-blue-600 rounded-md shadow-md cursor-pointer hover:bg-blue-500">
-          <FaDownload />
-        </div>
-      </div>
     </div>
   );
 }
