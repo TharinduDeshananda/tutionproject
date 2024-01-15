@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import { getTeacherOwnClassRooms } from "src/queries/classroom/ClassRoomQueries";
 import LoadingComp from "@/components/loadingcomp/LoadingComp";
+import { toast } from "react-toastify";
 type FormValueType = {
   title?: string;
   content?: string;
@@ -53,6 +54,12 @@ function NewNoticePage() {
       });
       const body = await response.json();
       if (body.status !== 0) throw new Error("Notice creation failed: ");
+    },
+    onError: (e) => {
+      toast.error("Notice creation failed: ", (e as any).message);
+    },
+    onSuccess: () => {
+      toast.success("Notice created");
     },
   });
 
@@ -143,7 +150,12 @@ function NewNoticePage() {
                     selectedList?.map((i) => i.name)
                   );
                 }} // Function will trigger on select event
-                onRemove={() => {}} // Function will trigger on remove event
+                onRemove={(selectedList, selectedItem) => {
+                  formik.setFieldValue(
+                    "classesCodes",
+                    selectedList?.map((i) => i.name)
+                  );
+                }} // Function will trigger on remove event
                 displayValue="name" // Property name to display in the dropdown options
                 placeholder="Use class code here"
               />
