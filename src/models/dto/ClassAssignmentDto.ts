@@ -1,5 +1,6 @@
 import { AssignmentStatus } from "src/enum/AssignmentStatus";
 import ClassRoomDto from "./ClassRoomDto";
+import UserDto from "./UserDto";
 
 export default class ClassAssignmentDto {
   public name?: string;
@@ -8,4 +9,5 @@ export default class ClassAssignmentDto {
   public status?: AssignmentStatus;
   public classRoom: ClassRoomDto;
   public year?: number;
+  public publisher?: UserDto;
 }

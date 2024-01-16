@@ -14,6 +14,7 @@ export const ClassAssignmentSchema = new mongoose.Schema<ClassAssignmentDto>(
     },
     classRoom: { type: mongoose.Types.ObjectId, ref: "ClassRoom" },
     year: { type: Number },
+    publisher: { type: mongoose.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );

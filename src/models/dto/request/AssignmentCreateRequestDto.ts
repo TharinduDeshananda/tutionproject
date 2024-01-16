@@ -2,6 +2,7 @@ import { IsEmpty, IsEnum, IsInt, Min } from "class-validator";
 import { AssignmentStatus } from "src/enum/AssignmentStatus";
 
 export default class AssignmentCreateRequestDto {
+  public id?: string;
   @IsEmpty({ message: "Assignment name cannot be empty" })
   public name?: string;
   @IsEmpty({ message: "Assignment description cannot be empty" })
@@ -12,7 +13,7 @@ export default class AssignmentCreateRequestDto {
   @IsEnum(AssignmentStatus)
   public status?: AssignmentStatus;
   @IsEmpty({ message: "Class code cannot be empty" })
-  public classCode: string;
+  public classCode?: string;
 
   @IsEmpty({ message: "Class code cannot be empty" })
   @IsInt({ message: "year should be a number" })

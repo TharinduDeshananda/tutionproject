@@ -6,9 +6,17 @@ import MultiFileUploadField from "./MultiFileUploadField";
 import { useFormik } from "formik";
 import CustomTextArea from "./CustomTextArea";
 import Spin from "@/util/Spin";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  useIsFetching,
+  useIsMutating,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { json } from "stream/consumers";
+import { toast } from "react-toastify";
+import LoadingComp from "./loadingcomp/LoadingComp";
 
 type PropType = {
   teacherId: string;
@@ -17,7 +25,7 @@ type PropType = {
 type FormType = {
   year?: number;
   classCode?: string;
-  duedate?: string;
+  dueDate?: string;
   status?: string;
   name?: string;
   description?: string;
@@ -28,18 +36,21 @@ type FormErrors = {
   name?: string;
   description?: string;
   status?: string;
-  duedate?: string;
+  dueDate?: string;
 };
 function AssignmentCreateComp({ teacherId }: PropType) {
   const initValues: FormType = {
     classCode: "",
     description: "",
-    duedate: "",
+    dueDate: "",
     name: "",
     status: "OPEN",
     year: new Date().getFullYear(),
   };
 
+  const queryClient = useQueryClient();
+  const isMutating = useIsMutating();
+  const isFetching = useIsFetching();
   const submitMutation = useMutation({
     mutationKey: ["assignment"],
     mutationFn: async (values: FormType) => {
@@ -50,11 +61,19 @@ function AssignmentCreateComp({ teacherId }: PropType) {
       const body = await response.json();
       if (!response.ok || body.status !== 0) throw new Error(body.message);
     },
+    onError: (e) => {
+      toast.error((e as any).message);
+    },
+    onSuccess: () => {
+      toast.success("Assignment created");
+      queryClient.invalidateQueries({ queryKey: ["assignment"] });
+    },
   });
   const formik = useFormik<FormType>({
     initialValues: initValues,
     onSubmit: (values) => {
       console.log(values);
+      submitMutation.mutate(values);
     },
     validate: (values: FormType) => {
       const errors: FormErrors = {};
@@ -64,8 +83,8 @@ function AssignmentCreateComp({ teacherId }: PropType) {
       if (!values.description)
         errors.description = "Assignment Description cannot be empty";
       if (!values.status) errors.status = "Assignment Status cannot be empty";
-      if (!values.duedate)
-        errors.duedate = "Assignment Due Date cannot be empty";
+      if (!values.dueDate)
+        errors.dueDate = "Assignment Due Date cannot be empty";
       return errors;
     },
   });
@@ -110,7 +129,7 @@ function AssignmentCreateComp({ teacherId }: PropType) {
           label="Class Year"
           labelStyle="text-xs"
           inputName="year"
-          value={formik.values.year.toString()}
+          value={formik.values.year?.toString()}
           onChangeHandler={formik.handleChange}
         />
 
@@ -136,8 +155,8 @@ function AssignmentCreateComp({ teacherId }: PropType) {
           placeholder="Due Date"
           label="Due Date"
           labelStyle="text-xs"
-          inputName="duedate"
-          value={formik.values.duedate}
+          inputName="dueDate"
+          value={formik.values.dueDate}
           onChangeHandler={formik.handleChange}
         />
         <CustomSelectWithLabel
@@ -184,12 +203,17 @@ function AssignmentCreateComp({ teacherId }: PropType) {
             ))}
         </div>
 
-        <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-3">
+        <div className="flex flex-col items-center justify-center col-span-1 sm:col-span-2 md:col-span-3">
+          {(isFetching > 0 || isMutating > 0) && (
+            <LoadingComp styleClassName="w-8 h-8 my-4" />
+          )}
           <input
             type="submit"
             value="Create Assignment"
             className="generic-button-primary "
-            disabled={classCodeQuery.isLoading}
+            disabled={
+              classCodeQuery.isLoading || isFetching > 0 || isMutating > 0
+            }
           />
         </div>
         <p className="col-span-1 text-sm sm:col-span-2 md:col-span-3">

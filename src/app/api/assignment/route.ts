@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
       AssignmentCreateRequestDto,
       body
     );
+
+    console.log(requestDto);
     const entity = await createAssignment(requestDto);
 
     return NextResponse.json({ status: 0, message: "succss", body: entity });
