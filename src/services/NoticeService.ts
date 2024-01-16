@@ -1,5 +1,5 @@
 import { instanceToInstance, instanceToPlain } from "class-transformer";
-import { AnyKeys, Document } from "mongoose";
+import { AnyKeys, Document, PipelineStage } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import { db } from "src/helpers/db";
@@ -107,6 +107,88 @@ export async function getSingleNotice(id: string) {
     return notice;
   } catch (error) {
     console.log("method getSingleNotice failed: ", error);
+    throw error;
+  }
+}
+
+export class TeacherNoticesFilter {
+  title?: string;
+  before?: Date;
+  after?: Date;
+  classCode?: string;
+  page?: number;
+  size?: number;
+}
+
+export async function getTeacherOwnNoticesFiltered(
+  filter: TeacherNoticesFilter
+) {
+  try {
+    console.log("method getTeacherOwnNoticesFiltered start");
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
+    if (!userEmail) throw new Error("unauthorized");
+
+    const pipeline: PipelineStage[] = [];
+
+    pipeline.push({
+      $lookup: {
+        from: "users",
+        localField: "sender",
+        foreignField: "_id",
+        as: "senderObj",
+      },
+    });
+
+    pipeline.push({ $match: { "senderObj.email": userEmail } });
+
+    if (filter.title)
+      pipeline.push({ $match: { title: new RegExp(filter.title, "i") } });
+    if (filter.before)
+      pipeline.push({ $match: { createdAt: { $lte: filter.before } } });
+    if (filter.after)
+      pipeline.push({ $match: { createdAt: { $gte: filter.after } } });
+
+    if (filter.classCode) {
+      pipeline.push({
+        $lookup: {
+          from: "classrooms",
+          localField: "classes",
+          foreignField: "_id",
+          as: "classRoomsObj",
+        },
+      });
+
+      pipeline.push({
+        $match: {
+          classRoomsObj: {
+            $elemMatch: { classCode: new RegExp(filter.classCode, "i") },
+          },
+        },
+      });
+    }
+
+    pipeline.push({
+      $facet: {
+        count: [{ $count: "count" }],
+        result: [
+          { $skip: ((filter.page ?? 1) - 1) * (filter.size ?? 10) },
+          { $limit: filter.size ?? 10 },
+        ],
+      },
+    });
+
+    // if (filter.page && filter.size) {
+    //   pipeline.push({ $skip: (filter.page - 1) * filter.size });
+    //   pipeline.push({ $limit: filter.size });
+    // }
+
+    const notices = await db.NoticeEntity.aggregate(pipeline);
+
+    console.log("method getTeacherOwnNoticesFiltered success");
+    return notices;
+  } catch (error) {
+    console.error("method getTeacherOwnNoticesFiltered failed: ", error);
     throw error;
   }
 }

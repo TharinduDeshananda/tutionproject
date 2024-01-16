@@ -48,7 +48,7 @@ async function SingleNoticePage({ params }: { params: { id: string } }) {
         <div className="self-start text-xs text-gray-500">
           {(notice as any).createdAt.toString()}
         </div>
-        <div>{notice.content}</div>
+        <div className="text-sm text-justify">{notice.content}</div>
       </div>
     </div>
   );

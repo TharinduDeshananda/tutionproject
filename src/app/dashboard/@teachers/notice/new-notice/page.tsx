@@ -8,6 +8,7 @@ import {
   useIsMutating,
   useMutation,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { getTeacherOwnClassRooms } from "src/queries/classroom/ClassRoomQueries";
 import LoadingComp from "@/components/loadingcomp/LoadingComp";
@@ -34,7 +35,7 @@ function NewNoticePage() {
   const isMutating = useIsMutating();
   const [imageFileTempUrl, setImageFileTempUrl] = useState<string>("");
   const [imgFile, setImgFile] = useState<File | null>(null);
-
+  const queryClient = useQueryClient();
   const createNoticeMutation = useMutation({
     mutationFn: async (data: FormValueType) => {
       const formData = new FormData();
@@ -60,6 +61,7 @@ function NewNoticePage() {
     },
     onSuccess: () => {
       toast.success("Notice created");
+      queryClient.invalidateQueries({ queryKey: ["notice"] });
     },
   });
 
