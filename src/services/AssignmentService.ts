@@ -84,18 +84,19 @@ export async function createAssignment(
 
       if (!requestDto.classCode) throw new Error("class code is required");
 
-      const classRoom = await db.ClassRoomEntity.findOne({
-        classCode: requestDto.classCode,
-      });
+      //class room and year cannot be updated
+      const classRoom = await db.ClassRoomEntity.findById(
+        existing.get("classRoom")?.toString()
+      );
       if (!classRoom) throw new Error("Class room not found");
 
-      existing.set("classRoom", classRoom._id);
+      // existing.set("classRoom", classRoom._id);
       if (requestDto.name) existing.set("name", requestDto.name);
       if (requestDto.description)
         existing.set("description", requestDto.description);
       if (requestDto.dueDate) existing.set("dueDate", requestDto.dueDate);
       if (requestDto.status) existing.set("status", requestDto.status);
-      if (requestDto.year) existing.set("year", requestDto.year);
+      // if (requestDto.year) existing.set("year", requestDto.year);
 
       await existing.save();
       return {

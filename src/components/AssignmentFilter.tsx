@@ -1,6 +1,5 @@
 "use client";
-import PaginationComp from "./PaginationComp";
-import CustomButton from "@/util/CustomButton";
+
 import CustomInputField from "@/util/CustomInputField";
 import React, { useMemo, useState } from "react";
 import { assignmentDetils } from "@/constants";
@@ -10,6 +9,7 @@ import { AssignmentStatus } from "src/enum/AssignmentStatus";
 import { useIsFetching, useQuery } from "@tanstack/react-query";
 import LoadingComp from "./loadingcomp/LoadingComp";
 import PaginationCompWithCallback from "./NewPaginationComp/PaginationCompWithCallback";
+import { useRouter } from "next/navigation";
 
 type FormType = {
   name?: string;
@@ -21,13 +21,15 @@ type FormType = {
 const initValues: FormType = { status: undefined };
 
 function AssignmentFilter({ style = {} }) {
-  const [currentPAge, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
   const isFetching = useIsFetching();
   const [queryString, setQueryString] = useState<string>("");
   const filterQuery = useQuery({
     queryKey: ["assignment", queryString],
     queryFn: async ({ queryKey }) => {
       console.log(queryKey[1]);
+
       const response = await fetch("/api/assignment?" + (queryKey[1] ?? ""));
       const body = await response.json();
       console.log(body);
@@ -43,6 +45,7 @@ function AssignmentFilter({ style = {} }) {
       for (let key of Object.keys(values)) {
         params.append(key, values[key]);
       }
+      params.append("page", (currentPage ?? 1).toString());
       setQueryString(params.toString());
     },
   });
@@ -103,10 +106,9 @@ function AssignmentFilter({ style = {} }) {
           />
         </div>
         <div className="flex flex-col items-center justify-center flex-1 w-full genp gap-y-3">
-          {isFetching > 0 && <LoadingComp styleClassName="w-6 h-6" />}
           <input
             type="submit"
-            value={"filter"}
+            value={isFetching > 0 ? "Wait ⏱️" : "Filter"}
             className="px-10 text-xs genbtn"
             disabled={isFetching > 0}
           />
@@ -122,8 +124,10 @@ function AssignmentFilter({ style = {} }) {
         (filterQuery.data?.count?.[0]?.count ?? 0) > 0 && (
           <PaginationCompWithCallback
             perPage={10}
-            totalPages={filterQuery.data.count?.[0].count ?? 0}
-            currentPage={currentPAge}
+            totalPages={Math.ceil(
+              (filterQuery.data.count?.[0].count ?? 0) / 10
+            )}
+            currentPage={currentPage}
             onClickPage={(num) => setCurrentPage(num)}
           />
         )}
@@ -165,7 +169,16 @@ function AssignmentFilter({ style = {} }) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filterQuery.data?.result?.map((item, index) => (
-              <tr key={index}>
+              <tr
+                key={index}
+                onClick={() => {
+                  router.push(
+                    "/dashboard/assignment/updateassignment/" +
+                      (item?._id?.toString() ?? "")
+                  );
+                }}
+                className="cursor-pointer hover:bg-blue-100 transition-colors duration-300 ease-out"
+              >
                 <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap">
                   {item?.name ?? "NA"}
                 </td>
