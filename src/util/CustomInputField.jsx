@@ -6,10 +6,11 @@ function CustomInputField({
   name = "",
   label = "",
   placeholder = "",
-  onChange = () => {},
+  onChange = (e) => {},
   labelStyle = {},
   inputStyle = {},
   wrapperStyle = {},
+  value = "",
 }) {
   if (name == null || name?.length == 0)
     throw new Error("Name cannot be empty");
@@ -23,6 +24,7 @@ function CustomInputField({
         style={inputStyle}
         type={type}
         name={name}
+        value={value}
         placeholder={placeholder}
         className="w-full px-3 py-3 text-gray-700 border rounded-md shadow-md focus:outline-none focus:border-green-500"
         onChange={onChange}

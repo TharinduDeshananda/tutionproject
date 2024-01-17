@@ -2,103 +2,188 @@
 import PaginationComp from "./PaginationComp";
 import CustomButton from "@/util/CustomButton";
 import CustomInputField from "@/util/CustomInputField";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { assignmentDetils } from "@/constants";
 import CustomSelectField from "./CustomSelectField";
+import { useFormik } from "formik";
+import { AssignmentStatus } from "src/enum/AssignmentStatus";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
+import LoadingComp from "./loadingcomp/LoadingComp";
+import PaginationCompWithCallback from "./NewPaginationComp/PaginationCompWithCallback";
+
+type FormType = {
+  name?: string;
+  status?: AssignmentStatus;
+  classCode?: string;
+  before?: Date;
+  after?: Date;
+};
+const initValues: FormType = { status: undefined };
+
 function AssignmentFilter({ style = {} }) {
+  const [currentPAge, setCurrentPage] = useState(1);
+  const isFetching = useIsFetching();
+  const [queryString, setQueryString] = useState<string>("");
+  const filterQuery = useQuery({
+    queryKey: ["assignment", queryString],
+    queryFn: async ({ queryKey }) => {
+      console.log(queryKey[1]);
+      const response = await fetch("/api/assignment?" + (queryKey[1] ?? ""));
+      const body = await response.json();
+      console.log(body);
+      return body.body?.[0] ?? {};
+    },
+  });
+
+  const formik = useFormik({
+    initialValues: initValues,
+    onSubmit: (values) => {
+      console.log(values);
+      const params = new URLSearchParams();
+      for (let key of Object.keys(values)) {
+        params.append(key, values[key]);
+      }
+      setQueryString(params.toString());
+    },
+  });
+
   const data = useMemo(() => assignmentDetils, []);
   return (
     <div>
-      <div
-        className="flex flex-row flex-wrap w-full gap-5 p-5 mx-auto my-5 bg-white rounded-md justify-araound drop-shadow-md"
+      <form
+        onSubmit={formik.handleSubmit}
+        className="flex flex-row flex-wrap w-full gap-5 p-5 mx-auto my-5 bg-white rounded-md justify-araound drop-shadow-md "
         style={style}
       >
         <CustomInputField
-          name="assignment_name"
+          name="name"
           label="Name"
-          placeholder="assignment name"
+          placeholder="Assignment Name"
+          value={formik.values.name}
+          onChange={formik.handleChange}
         />
         <CustomInputField
-          name="class_name"
-          label="Class"
-          placeholder="class name"
+          name="classCode"
+          label="Class Code"
+          placeholder="Class Code"
+          value={formik.values.classCode}
+          onChange={formik.handleChange}
         />
 
         <CustomInputField
           type="date"
-          name="due_date"
-          label="Due date"
+          name="after"
+          label="Due date after"
           placeholder="due date"
+          value={formik.values.after?.toString()}
+          onChange={formik.handleChange}
         />
-        <div className="flex flex-col justify-center items-start">
+        <CustomInputField
+          type="date"
+          name="before"
+          label="Due date before"
+          placeholder="due date"
+          value={formik.values.before?.toString()}
+          onChange={formik.handleChange}
+        />
+        <div className="flex flex-col items-start justify-center">
           <h1 className="text-gray-500">Status</h1>
           <CustomSelectField
             placeholder="status"
             inputStyle={{ padding: 12 }}
+            inputName="status"
             options={[
-              { optionName: "OPEN", value: "OPEN" },
-              { optionName: "CLOSED", value: "CLOSED" },
+              { optionName: "OPEN", value: AssignmentStatus.OPEN },
+              { optionName: "CLOSED", value: AssignmentStatus.CLOSED },
+              { optionName: "HOLD", value: AssignmentStatus.HOLD },
+              { optionName: "ANY", value: "" },
             ]}
+            value={formik.values.status}
+            onChangeHandle={formik.handleChange}
+          />
+        </div>
+        <div className="flex flex-col items-center justify-center flex-1 w-full genp gap-y-3">
+          {isFetching > 0 && <LoadingComp styleClassName="w-6 h-6" />}
+          <input
+            type="submit"
+            value={"filter"}
+            className="px-10 text-xs genbtn"
+            disabled={isFetching > 0}
           />
         </div>
 
-        <CustomButton
+        {/* <CustomButton
           title="Filter"
           onClick={() => {}}
           style={{ alignSelf: "end" }}
-        />
-      </div>{" "}
-      <PaginationComp currentPage={2} pageCount={10} />
-      <table className="min-w-full divide-y divide-gray-200 shadow-md">
-        <thead className="bg-gray-50">
-          <tr>
-            <th
-              scope="col"
-              className="px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-            >
-              Assignment Name
-            </th>
-            <th
-              scope="col"
-              className="hidden px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase md:table-cell"
-            >
-              Class
-            </th>
+        /> */}
+      </form>{" "}
+      {filterQuery.isSuccess &&
+        (filterQuery.data?.count?.[0]?.count ?? 0) > 0 && (
+          <PaginationCompWithCallback
+            perPage={10}
+            totalPages={filterQuery.data.count?.[0].count ?? 0}
+            currentPage={currentPAge}
+            onClickPage={(num) => setCurrentPage(num)}
+          />
+        )}
+      {filterQuery.isLoading && (
+        <div className="genp my-5 w-full flex justify-center items-center">
+          <LoadingComp />
+        </div>
+      )}
+      {filterQuery.isSuccess && (
+        <table className="min-w-full divide-y divide-gray-200 shadow-md mb-10">
+          <thead className="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                className="px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+              >
+                Assignment Name
+              </th>
+              <th
+                scope="col"
+                className="hidden px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase md:table-cell"
+              >
+                Class
+              </th>
 
-            <th
-              scope="col"
-              className="hidden px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:table-cell"
-            >
-              Due Date
-            </th>
-            <th
-              scope="col"
-              className="px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-            >
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((item, index) => (
-            <tr key={index}>
-              <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap">
-                {item.assignmentName}
-              </td>
-              <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap md:table-cell">
-                {item.class}
-              </td>
-
-              <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap sm:table-cell">
-                {item.dueDate}
-              </td>
-              <td className="px-2 py-4 text-xs text-gray-500 whitespace-nowrap">
-                {item.status}
-              </td>
+              <th
+                scope="col"
+                className="hidden px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:table-cell"
+              >
+                Due Date
+              </th>
+              <th
+                scope="col"
+                className="px-2 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+              >
+                Status
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filterQuery.data?.result?.map((item, index) => (
+              <tr key={index}>
+                <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap">
+                  {item?.name ?? "NA"}
+                </td>
+                <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap md:table-cell">
+                  {item?.classRoomObj?.[0]?.classCode ?? "NA"}
+                </td>
+
+                <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap sm:table-cell">
+                  {item?.dueDate ?? "NA"}
+                </td>
+                <td className="px-2 py-4 text-xs text-gray-500 whitespace-nowrap">
+                  {item?.status ?? "NA"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

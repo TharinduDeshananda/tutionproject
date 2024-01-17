@@ -6,6 +6,8 @@ import ClassAssignmentDto from "src/models/dto/ClassAssignmentDto";
 import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import UserRole from "src/enum/UserRole";
+import { AssignmentStatus } from "src/enum/AssignmentStatus";
+import { PipelineStage } from "mongoose";
 
 export async function createAssignment(
   requestDto: AssignmentCreateRequestDto
@@ -24,7 +26,7 @@ export async function createAssignment(
       userRole !== UserRole.ADMIN.toString()
     )
       throw new Error("Unauthorized");
-    console.log("pass");
+
     const userEmail = session?.user?.email;
     const user = await db.UserEntity.findOne({ email: userEmail });
     if (!user) throw new Error("User not found");
@@ -44,7 +46,6 @@ export async function createAssignment(
       if (classRoom?.get("teacher")?.email !== userEmail)
         throw new Error("unauthorized");
 
-      console.log(requestDto.dueDate);
       if (!requestDto.dueDate) throw new Error("Due date is required");
       if (requestDto.dueDate < new Date())
         throw new Error(
@@ -59,6 +60,7 @@ export async function createAssignment(
         classRoom: classRoom._id,
         publisher: user._id,
       };
+
       const saved: ClassAssignmentDto = await db.AssignmentEntity.create(
         docTobeSaved
       );
@@ -108,6 +110,72 @@ export async function createAssignment(
     }
   } catch (error) {
     console.error("method CreateAssignment failed: ", error);
+    throw error;
+  }
+}
+
+export type TeacherAssignmentFilterType = {
+  name?: string;
+  status?: AssignmentStatus;
+  classCode?: string;
+  before?: Date;
+  after?: Date;
+  page?: number;
+  size?: number;
+};
+export async function getTeacherOwnAssignmentsFiltered(
+  filter: TeacherAssignmentFilterType
+) {
+  try {
+    const pipeline: PipelineStage[] = [];
+
+    const session = await getServerSession(authOptions);
+    const teacherEmail = session?.user?.email;
+    if (!teacherEmail) throw new Error("unauthorized");
+    console.log(filter);
+    pipeline.push({
+      $lookup: {
+        localField: "publisher",
+        foreignField: "_id",
+        from: "users",
+        as: "publisherObj",
+      },
+    });
+
+    pipeline.push({
+      $lookup: {
+        localField: "classRoom",
+        foreignField: "_id",
+        from: "classrooms",
+        as: "classRoomObj",
+      },
+    });
+
+    pipeline.push({ $match: { "publisherObj.email": teacherEmail } });
+
+    if (filter.name && filter.name.length !== 0)
+      pipeline.push({ $match: { name: new RegExp(filter.name, "i") } });
+    if (filter.status) pipeline.push({ $match: { status: filter.status } });
+    if (filter.after)
+      pipeline.push({ $match: { dueDate: { $gte: filter.after } } });
+    if (filter.before)
+      pipeline.push({ $match: { dueDate: { $lte: filter.before } } });
+
+    pipeline.push({
+      $facet: {
+        count: [{ $count: "count" }],
+        result: [
+          { $skip: ((filter.page ?? 1) - 1) * (filter.size ?? 10) },
+          { $limit: filter.size ?? 10 },
+        ],
+      },
+    });
+
+    const result = await db.AssignmentEntity.aggregate(pipeline);
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error("method getTeacherOwnAssignmentsFiltered failed: ", error);
     throw error;
   }
 }
