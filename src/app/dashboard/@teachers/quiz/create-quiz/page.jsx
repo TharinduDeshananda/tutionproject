@@ -154,13 +154,26 @@ function QuizCreatePage() {
           {/* publish time pick start */}
           <div className="col-start-1 my-3">
             <label
-              htmlFor="publishdatetime"
+              htmlFor="publishStatus"
               className="block text-xs font-medium text-gray-900 md:text-sm "
             >
-              Select a publish date
+              Select a publish status
             </label>
 
-            <input
+            <select
+              id="publishStatus"
+              name="status"
+              className="  bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+            >
+              <option className="text-xs md:text-sm" value="maths-10">
+                PUBLISHED
+              </option>
+              <option className="text-xs md:text-sm" value="science-09">
+                UNPUBLISHED
+              </option>
+            </select>
+
+            {/* <input
               defaultValue={getDateTimeForInputFields()}
               min={getDateTimeForInputFields()}
               type="datetime-local"
@@ -168,10 +181,7 @@ function QuizCreatePage() {
               name="publishdatetime"
               className=" bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
-            />
-            <span className="text-xs">
-              you may need to enter time by typing on some browsers.
-            </span>
+            /> */}
           </div>
           {/* publish time pick end */}
           {/* valid time pick start */}
