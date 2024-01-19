@@ -70,7 +70,7 @@ function AssignmentUpdateComp({ teacherId, details, id }: PropType) {
       toast.error((e as any).message);
     },
     onSuccess: () => {
-      toast.success("Assignment created");
+      toast.success("Assignment updated");
       queryClient.invalidateQueries({ queryKey: ["assignment"] });
     },
   });

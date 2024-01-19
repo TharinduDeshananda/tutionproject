@@ -13,12 +13,12 @@ import { useRouter } from "next/navigation";
 
 type FormType = {
   name?: string;
-  status?: AssignmentStatus;
+  status?: string;
   classCode?: string;
   before?: Date;
   after?: Date;
 };
-const initValues: FormType = { status: undefined };
+const initValues: FormType = { status: "" };
 
 function AssignmentFilter({ style = {} }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -132,12 +132,12 @@ function AssignmentFilter({ style = {} }) {
           />
         )}
       {filterQuery.isLoading && (
-        <div className="genp my-5 w-full flex justify-center items-center">
+        <div className="flex items-center justify-center w-full my-5 genp">
           <LoadingComp />
         </div>
       )}
       {filterQuery.isSuccess && (
-        <table className="min-w-full divide-y divide-gray-200 shadow-md mb-10">
+        <table className="min-w-full mb-10 divide-y divide-gray-200 shadow-md">
           <thead className="bg-gray-50">
             <tr>
               <th
@@ -177,7 +177,7 @@ function AssignmentFilter({ style = {} }) {
                       (item?._id?.toString() ?? "")
                   );
                 }}
-                className="cursor-pointer hover:bg-blue-100 transition-colors duration-300 ease-out"
+                className="transition-colors duration-300 ease-out cursor-pointer hover:bg-blue-100"
               >
                 <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap">
                   {item?.name ?? "NA"}
