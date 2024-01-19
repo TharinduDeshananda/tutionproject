@@ -79,7 +79,7 @@ export async function createAssignment(
       const existing = await db.AssignmentEntity.findById(requestDto.id);
       if (!existing) throw new Error("Assignment not found");
 
-      if (existing.get("publisher")?.toString() !== user._id)
+      if (existing.get("publisher")?.toString() !== user._id.toString())
         throw new Error("unauthorized");
 
       if (!requestDto.classCode) throw new Error("class code is required");

@@ -14,6 +14,7 @@ type PropType = {
   options?: SelectType[];
   required?: boolean;
   inputStyle?: React.CSSProperties;
+  disabled?: boolean;
 };
 
 function CustomSelectField({
@@ -25,6 +26,7 @@ function CustomSelectField({
   options = [],
   required = false,
   inputStyle = {},
+  disabled = false,
 }: PropType) {
   return (
     <select
@@ -35,6 +37,7 @@ function CustomSelectField({
       onChange={onChangeHandle}
       placeholder={placeholder}
       required={required}
+      disabled={disabled}
       className="sm:text-sm text-xs outline-none bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
     >
       {options.map((i, index) => (

@@ -10,6 +10,7 @@ export type FilePropType = {
   value?: string;
   required?: boolean;
   inputStyle?: string;
+  disabled?: boolean;
 };
 
 const CustomInputField = ({
@@ -20,6 +21,7 @@ const CustomInputField = ({
   inputName = "",
   value = "",
   inputStyle = "",
+  disabled = false,
 }: FilePropType) => {
   return (
     <input
@@ -27,6 +29,7 @@ const CustomInputField = ({
       name={inputName}
       id={inputName}
       value={value}
+      disabled={disabled}
       className={twMerge(
         "text-xs outline-none bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ",
         inputStyle

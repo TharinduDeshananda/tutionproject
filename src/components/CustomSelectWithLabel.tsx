@@ -14,6 +14,7 @@ type PropType = {
   wrapperStyle?: string;
   labelStyle?: string;
   label?: string;
+  disabled?: boolean;
 };
 function CustomSelectWithLabel(props: PropType) {
   return (
@@ -35,6 +36,7 @@ function CustomSelectWithLabel(props: PropType) {
         placeholder={props.placeholder}
         required={props.required}
         value={props.value}
+        disabled={props.disabled}
       />
     </div>
   );

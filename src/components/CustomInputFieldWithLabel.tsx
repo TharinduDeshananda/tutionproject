@@ -13,6 +13,7 @@ type PropType = {
   onChangeHandler?: (event: React.ChangeEvent) => void;
   labelStyle?: string;
   wrapperStyle?: string;
+  disabled?: boolean;
 };
 function CustomInputFieldWithLabel(props: PropType) {
   return (
@@ -33,6 +34,7 @@ function CustomInputFieldWithLabel(props: PropType) {
         type={props.type}
         value={props.value}
         onChangeHandle={props.onChangeHandler}
+        disabled={props.disabled}
       />
     </div>
   );
