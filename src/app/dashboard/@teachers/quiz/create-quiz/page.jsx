@@ -1,25 +1,71 @@
 "use client";
-
 import SingleQuestion from "@/components/SingleQuestion";
 import { getDateTimeForInputFields } from "@/util/DateTimeUtil";
+import Spin from "@/util/Spin";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useFormik } from "formik";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import useIsBusy from "src/hooks/useIsBusy";
+import { startQuiz } from "src/mutations/QuizMutations";
+import { getTeacherOwnClassRooms } from "src/queries/classroom/ClassRoomQueries";
 
-// const questionObj = {
-//   id: questionId,
-//   question: "",
-//   mutipleCorrect: false,
-//   anyCorrect: false,
-//   editing: false,
-//   answers: [],
-// };
+const formInitValues = {
+  name: "",
+  description: "",
+  status: "PUBLISHED",
+  classCode: "",
+  deadline: getDateTimeForInputFields(new Date()),
+  id: "",
+};
 
 function QuizCreatePage() {
+  const startQuizMutation = useMutation({
+    mutationFn: async (dto) => {
+      const result = await startQuiz(dto);
+      return result;
+    },
+    onSuccess: (data) => {
+      formik.setFieldValue("id", data.id);
+      toast.success("Quiz updated.");
+    },
+    onError: (error) => {
+      toast.error("Failed: " + error.message);
+    },
+  });
+
+  const isBusy = useIsBusy();
   const [currentQuestions, setCurrentQuestions] = useState([]);
+  const formik = useFormik({
+    initialValues: formInitValues,
+    onSubmit: (values) => {
+      const data = {
+        ...values,
+        questions: currentQuestions ?? [],
+      };
+      console.log(data);
+
+      startQuizMutation.mutate(data);
+    },
+  });
+  const teacherClassRoomsQuery = useQuery({
+    queryKey: ["classRoom", "own"],
+    queryFn: async () => {
+      const result = await getTeacherOwnClassRooms();
+
+      console.log(result);
+      formik.setFieldValue("classCode", result?.[0]?.classCode);
+      return result;
+    },
+  });
+
+  const [quizId, setQuizId] = useState("");
+
   const [currentId, setCurrentId] = useState(0);
   const removeQuestion = (questionId) => {
     setCurrentQuestions((current) => {
       console.log("before removing : ", current);
-      console.log("removing questionid: ", questionId);
+      console.log("removing questionid : ", questionId);
       const filteredList = current.filter((q) => q.id !== questionId);
       console.log("after removing : ", filteredList);
 
@@ -70,7 +116,7 @@ function QuizCreatePage() {
         if (a.id < b.id) return -1;
         if (a.id === b.id)
           throw new Error(
-            "Method QuizCreatePage.removeQuestion two questions with same id found id: ",
+            "Method QuizCreatePage.remove Question two questions with same id found id: ",
             a.id
           );
         else return +1;
@@ -82,10 +128,16 @@ function QuizCreatePage() {
     <div className="w-full min-h-screen p-3 md:p-5">
       {/* quiz description creation part */}
       <div className="bg-white min-h-[300px] rounded-md  p-3 md:p-5">
+        <div className="flex flex-col items-center justify-center w-full my-2">
+          <Spin show={isBusy} label="please wait" />
+        </div>
         <h2 className="text-xs md:text-sm md:text-md 2xl:text-lg">
-          Describe your qustion paper here..
+          Describe your question paper here..
         </h2>
-        <div className="grid w-full grid-cols-1 md:grid-cols-2 ">
+        <form
+          className="grid w-full grid-cols-1 md:grid-cols-2 "
+          onSubmit={formik.handleSubmit}
+        >
           {/* questionair name start */}
           <div className="my-3 ">
             <label
@@ -97,10 +149,12 @@ function QuizCreatePage() {
             <input
               type="text"
               id="questionairName"
-              name="questionairName"
+              name="name"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               placeholder="ex:- Questionair on maths..."
               required
+              value={formik.values.name}
+              onChange={formik.handleChange}
             />
           </div>
           {/* questionair name end */}
@@ -119,6 +173,8 @@ function QuizCreatePage() {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               placeholder="Questionnaire description..."
               required
+              value={formik.values.description}
+              onChange={formik.handleChange}
             />
           </div>
           {/* Questionnaire name end */}
@@ -133,21 +189,22 @@ function QuizCreatePage() {
             </label>
             <select
               id="classselect"
-              name="classselect"
+              name="classCode"
+              value={formik.values.classCode}
+              onChange={formik.handleChange}
+              disabled={!teacherClassRoomsQuery.isSuccess}
               className="  bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
-              <option className="text-xs md:text-sm" value="maths-10">
-                Maths Grade 10
-              </option>
-              <option className="text-xs md:text-sm" value="science-09">
-                Science Grade 09
-              </option>
-              <option className="text-xs md:text-sm" value="science-06">
-                Science Grade 06
-              </option>
-              <option className="text-xs md:text-sm" value="science-07">
-                Science Grade 07
-              </option>
+              {teacherClassRoomsQuery.isSuccess &&
+                teacherClassRoomsQuery.data?.map((i, index) => (
+                  <option
+                    key={index}
+                    className="text-xs md:text-sm"
+                    value={i.classCode}
+                  >
+                    {i.classCode}
+                  </option>
+                ))}
             </select>
           </div>
           {/* class select end */}
@@ -163,12 +220,14 @@ function QuizCreatePage() {
             <select
               id="publishStatus"
               name="status"
+              value={formik.values.status}
+              onChange={formik.handleChange}
               className="  bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
-              <option className="text-xs md:text-sm" value="maths-10">
+              <option className="text-xs md:text-sm" value="PUBLISHED">
                 PUBLISHED
               </option>
-              <option className="text-xs md:text-sm" value="science-09">
+              <option className="text-xs md:text-sm" value="UNPUBLISHED">
                 UNPUBLISHED
               </option>
             </select>
@@ -194,11 +253,12 @@ function QuizCreatePage() {
             </label>
 
             <input
-              defaultValue={getDateTimeForInputFields()}
               min={getDateTimeForInputFields()}
               type="datetime-local"
               id="validdatetime"
-              name="validdatetime"
+              name="deadline"
+              value={formik.values.deadline}
+              onChange={formik.handleChange}
               className=" bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               required
             />
@@ -209,11 +269,14 @@ function QuizCreatePage() {
           {/* valie time pick end */}
           {/* create questionnaire button */}
           <div className="flex items-center justify-center col-span-2 col-start-1">
-            <button className="self-center px-5 py-3 text-white bg-blue-700 cursor-pointer hover:bg-blue-600">
-              Create Questionnaire
-            </button>
+            <input
+              className="self-center genbtn"
+              type="submit"
+              value={formik.values.id ? "Update" : "Create"}
+              disabled={isBusy}
+            />
           </div>
-        </div>
+        </form>
       </div>
       {/* quiz description creation part end*/}
 
@@ -228,9 +291,9 @@ function QuizCreatePage() {
           questions created.
         </h5>
         <button
-          className="self-start px-5 py-3 text-white bg-blue-700 cursor-pointer disabled:bg-gray-500 disabled:hover:bg-gray-500 disabled:cursor-default hover:bg-blue-600"
+          className="self-start genbtn"
           onClick={addQuestion}
-          disabled={currentQuestions.length === 20}
+          disabled={currentQuestions.length === 20 || isBusy}
         >
           Add Question
         </button>
@@ -245,7 +308,6 @@ function QuizCreatePage() {
           />
         ))}
       </div>
-      {/* quiz creation div end */}
     </div>
   );
 }

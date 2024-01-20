@@ -3,6 +3,7 @@ import { getClassAssignmentModel } from "src/models/ClassAssignmentModel";
 import { getClassRoomModel } from "src/models/ClassRoomModel";
 import { getGradeModel } from "src/models/GradeModel";
 import { getNoticeModel } from "src/models/NoticeModel";
+import { getQuizModel } from "src/models/QuizModel";
 import { getResourceUploadModel } from "src/models/ResourceUploadModel";
 import { getSubjectModel } from "src/models/SubjectModel";
 
@@ -19,4 +20,5 @@ export const db = {
   AssignmentEntity: getClassAssignmentModel(),
   ResourceUploadEntity: getResourceUploadModel(),
   NoticeEntity: getNoticeModel(),
+  QuizEntity: getQuizModel(),
 };
