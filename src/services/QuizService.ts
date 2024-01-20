@@ -1,4 +1,5 @@
 import { String } from "aws-sdk/clients/cloudtrail";
+import mongoose, { PipelineStage } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import QuizStatus from "src/enum/QuizPublishStatus";
@@ -90,6 +91,105 @@ export async function createQuiz(dto: CreateQuizDto): Promise<CreateQuizDto> {
     }
   } catch (error) {
     console.error("method createQuiz failed: ", error);
+    throw error;
+  }
+}
+
+export class QuizFilterType {
+  name?: string;
+  classCode?: string;
+  status?: String;
+  after?: Date;
+  before?: Date;
+  grade?: string;
+  subject?: string;
+  page?: number;
+  size?: number;
+}
+export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
+  try {
+    console.log("method getTeacherOwnQuizesFiltered start");
+    const session = await getServerSession(authOptions);
+    const teacherId = session?.user?.id;
+    if (!teacherId) throw new Error("unauthorized");
+
+    const pipeline: PipelineStage[] = [];
+
+    pipeline.push({
+      $match: { publisher: new mongoose.Types.ObjectId(teacherId) },
+    });
+
+    pipeline.push({
+      $lookup: {
+        as: "classRoom",
+        from: "classrooms",
+        foreignField: "classCode",
+        localField: "classCode",
+      },
+    });
+    pipeline.push({
+      $lookup: {
+        as: "grade",
+        from: "grades",
+        foreignField: "_id",
+        localField: "classRoom.grade",
+      },
+    });
+    pipeline.push({
+      $lookup: {
+        as: "subject",
+        from: "subjects",
+        foreignField: "_id",
+        localField: "classRoom.subject",
+      },
+    });
+
+    if (filter.name) pipeline.push({ $match: { name: filter.name } });
+    if (filter.status) pipeline.push({ $match: { status: filter.status } });
+    if (filter.classCode)
+      pipeline.push({ $match: { classCode: filter.classCode } });
+    if (filter.before)
+      pipeline.push({ $match: { deadline: { $lte: filter.before } } });
+    if (filter.after)
+      pipeline.push({ $match: { deadline: { $gte: filter.after } } });
+
+    if (filter.grade) {
+      pipeline.push({
+        $lookup: {
+          as: "gradeObj",
+          from: "grades",
+          foreignField: "_id",
+          localField: "grade",
+        },
+      });
+      pipeline.push({ $match: { "gradeObj.gradeCode": filter.grade } });
+    }
+    if (filter.subject) {
+      pipeline.push({
+        $lookup: {
+          as: "subjectObj",
+          from: "subjects",
+          foreignField: "_id",
+          localField: "subject",
+        },
+      });
+      pipeline.push({ $match: { "subjectObj.subjectCode": filter.subject } });
+    }
+    const page = filter.page ?? 1;
+    const size = filter.size ?? 10;
+
+    pipeline.push({
+      $facet: {
+        count: [{ $count: "count" }],
+        result: [{ $skip: (page - 1) * size }, { $limit: size }],
+      },
+    });
+
+    const result = await db.QuizEntity.aggregate(pipeline);
+    console.log("method getTeacherOwnQuizesFiltered sucess");
+    return result;
+  } catch (error) {
+    console.error("method getTeacherOwnQuizesFiltered failed: ", error);
     throw error;
   }
 }
