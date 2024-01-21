@@ -1,5 +1,6 @@
 "use client";
 import PaginationCompWithCallback from "@/components/NewPaginationComp/PaginationCompWithCallback";
+import QuizFilterComp from "@/components/quiz/QuizFilterComp";
 import Spin from "@/util/Spin";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -10,10 +11,12 @@ import { getQuizesQuery } from "src/queries/quiz/QuizQueries";
 function QuizPage() {
   const isBusy = useIsBusy();
   const [page, setPage] = useState(1);
+  const [queryString, setQueryString] = useState("");
   const quizQuery = useQuery({
-    queryKey: ["quiz"],
-    queryFn: async () => {
-      const result = await getQuizesQuery("");
+    queryKey: ["quiz", queryString],
+    queryFn: async ({ queryKey }) => {
+      const str = queryKey[1];
+      const result = await getQuizesQuery(str ?? "");
       console.log(result);
 
       return result ?? [];
@@ -30,6 +33,17 @@ function QuizPage() {
           </button>
         </Link>
         <h1 className="genh">Available quizes</h1>
+
+        {/* quiz filter start */}
+
+        <QuizFilterComp
+          onFilter={(filterStr) => {
+            console.log(filterStr);
+            setQueryString(filterStr ?? "");
+          }}
+        />
+        {/* quiz filter end */}
+
         {quizQuery.isSuccess && (
           <h1 className="my-1 text-xs text-gray-500">
             quizes: {quizQuery.data?.[0]?.count?.[0]?.count}

@@ -19,7 +19,8 @@ const formInitValues = {
   id: "",
 };
 
-function QuizCreatePage() {
+function QuizUpdatePage() {
+  const quizId = "65ab76d6b28b95a5c8ba5aef";
   const startQuizMutation = useMutation({
     mutationFn: async (dto) => {
       const result = await startQuiz(dto);
@@ -59,31 +60,31 @@ function QuizCreatePage() {
     },
   });
 
+  const quizQuery = useQuery({
+    queryKey: ["quiz", quizId],
+    queryFn: async ({ queryKey }) => {
+      const result = await getQuizesQueryById(queryKey[1]);
+
+      formik.setValues({
+        classCode: result.classCode,
+        deadline: result.deadline,
+        description: result.description,
+        id: result.id,
+        name: result.name,
+        status: result.status,
+      });
+      if (!result.id) throw new Error("Quiz details fetching failed");
+      setCurrentQuestions(result.questions);
+    },
+  });
+
   const [currentId, setCurrentId] = useState(0);
   const removeQuestion = (questionId) => {
     setCurrentQuestions((current) => {
       console.log("before removing : ", current);
       console.log("removing questionid : ", questionId);
       const filteredList = current.filter((q) => q.id !== questionId);
-      console.log("after removing : ", filteredList);
 
-      // filteredList.sort((a, b) => {
-      //   if (!a.id || !b.id)
-      //     throw new Error(
-      //       "Method QuizCreatePage.removeQuestion when sorting undefined ids found id1: ",
-      //       a.id,
-      //       " id2: ",
-      //       b.id
-      //     );
-      //   if (a.id < b.id) return -1;
-      //   if (a.id === b.id)
-      //     throw new Error(
-      //       "Method QuizCreatePage.removeQuestion two questions with same id found id: ",
-      //       a.id
-      //     );
-      //   else return +1;
-      // });
-      console.log("final sorted list: ", filteredList);
       return [...filteredList];
     });
   };
@@ -310,4 +311,4 @@ function QuizCreatePage() {
   );
 }
 
-export default QuizCreatePage;
+export default QuizUpdatePage;

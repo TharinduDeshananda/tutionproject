@@ -193,3 +193,27 @@ export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
     throw error;
   }
 }
+
+export async function getQuizById(id: string): Promise<CreateQuizDto> {
+  try {
+    console.log("method getQuizById start");
+
+    const quiz = await db.QuizEntity.findById(id);
+    if (!quiz) throw new Error("quiz not found");
+
+    console.log("method getQuizById success");
+    return {
+      id: quiz._id,
+      classCode: quiz.get("classCode"),
+      deadline: quiz.get("deadline"),
+      description: quiz.get("description"),
+      name: quiz.get("name"),
+      publisher: quiz.get("publisher"),
+      status: quiz.get("status"),
+      questions: quiz.get("questions"),
+    };
+  } catch (error) {
+    console.error("method getQuizById failed: ", error);
+    throw error;
+  }
+}
