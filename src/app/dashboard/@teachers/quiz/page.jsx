@@ -13,9 +13,11 @@ function QuizPage() {
   const [page, setPage] = useState(1);
   const [queryString, setQueryString] = useState("");
   const quizQuery = useQuery({
-    queryKey: ["quiz", queryString],
+    queryKey: ["quiz", queryString, page],
     queryFn: async ({ queryKey }) => {
-      const str = queryKey[1];
+      let str = queryKey[1] ?? "";
+      const page = queryKey[2];
+      str = str.length === 0 ? `page=${page}` : str + `&page=${page}`;
       const result = await getQuizesQuery(str ?? "");
       console.log(result);
 

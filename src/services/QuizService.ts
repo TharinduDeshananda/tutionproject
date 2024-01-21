@@ -115,6 +115,13 @@ export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
 
     const pipeline: PipelineStage[] = [];
 
+    if (filter.before) {
+      filter.before = new Date(filter.before);
+    }
+
+    if (filter.after) {
+      filter.after = new Date(filter.after);
+    }
     pipeline.push({
       $match: { publisher: new mongoose.Types.ObjectId(teacherId) },
     });
@@ -144,10 +151,13 @@ export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
       },
     });
 
-    if (filter.name) pipeline.push({ $match: { name: filter.name } });
+    if (filter.name)
+      pipeline.push({ $match: { name: new RegExp(filter.name, "i") } });
     if (filter.status) pipeline.push({ $match: { status: filter.status } });
     if (filter.classCode)
-      pipeline.push({ $match: { classCode: filter.classCode } });
+      pipeline.push({
+        $match: { classCode: new RegExp(filter.classCode, "i") },
+      });
     if (filter.before)
       pipeline.push({ $match: { deadline: { $lte: filter.before } } });
     if (filter.after)
@@ -162,7 +172,9 @@ export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
           localField: "grade",
         },
       });
-      pipeline.push({ $match: { "gradeObj.gradeCode": filter.grade } });
+      pipeline.push({
+        $match: { "gradeObj.gradeCode": new RegExp(filter.grade, "i") },
+      });
     }
     if (filter.subject) {
       pipeline.push({
@@ -173,7 +185,9 @@ export async function getTeacherOwnQuizesFiltered(filter: QuizFilterType) {
           localField: "subject",
         },
       });
-      pipeline.push({ $match: { "subjectObj.subjectCode": filter.subject } });
+      pipeline.push({
+        $match: { "subjectObj.subjectCode": new RegExp(filter.subject, "i") },
+      });
     }
     const page = filter.page ?? 1;
     const size = filter.size ?? 10;
