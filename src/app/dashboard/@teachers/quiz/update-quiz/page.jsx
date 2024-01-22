@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import useIsBusy from "src/hooks/useIsBusy";
 import { startQuiz } from "src/mutations/QuizMutations";
 import { getTeacherOwnClassRooms } from "src/queries/classroom/ClassRoomQueries";
+import { getQuizesQueryById } from "src/queries/quiz/QuizQueries";
 
 const formInitValues = {
   name: "",
@@ -64,10 +65,11 @@ function QuizUpdatePage() {
     queryKey: ["quiz", quizId],
     queryFn: async ({ queryKey }) => {
       const result = await getQuizesQueryById(queryKey[1]);
+      console.log(result);
 
       formik.setValues({
         classCode: result.classCode,
-        deadline: result.deadline,
+        deadline: new Date(result.deadline ?? "").toISOString(),
         description: result.description,
         id: result.id,
         name: result.name,
@@ -75,6 +77,7 @@ function QuizUpdatePage() {
       });
       if (!result.id) throw new Error("Quiz details fetching failed");
       setCurrentQuestions(result.questions);
+      return result;
     },
   });
 
