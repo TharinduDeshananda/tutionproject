@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 type PropType = {
   inputName?: string;
   wrapperStyle?: string;
@@ -7,10 +7,13 @@ type PropType = {
 };
 function MultiFileUploadField(props: PropType) {
   const [fileNames, setFileNames] = useState<string[]>([]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const names = [];
-    for (let i = 0; i < e.target.files.length; ++i) {
-      names.push(e.target.files[i].name);
+    const names: string[] = [];
+    if (e.target.files) {
+      for (let i = 0; i < e.target?.files?.length; ++i) {
+        if (e.target.files?.[i]) names.push(e?.target?.files?.[i]?.name);
+      }
     }
     setFileNames(names);
     console.log(fileNames);
@@ -21,7 +24,7 @@ function MultiFileUploadField(props: PropType) {
     <div className="w-full h-[300px] flex flex-col  bg-blue-100 border border-blue-400 generic-padding rounded-md shadow-lg">
       <label
         htmlFor={`input${props.inputName}`}
-        className="w-full h-full flex flex-col break-all overflow-y-auto  "
+        className="flex flex-col w-full h-full overflow-y-auto break-all "
       >
         <ol className="list-decimal">
           {fileNames.map((i, index) => (
@@ -36,7 +39,6 @@ function MultiFileUploadField(props: PropType) {
         className="hidden"
         onChange={handleFileChange}
         multiple
-        accept="image/*"
       />
     </div>
   );

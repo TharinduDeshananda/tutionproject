@@ -141,7 +141,7 @@ router.post(async (req, res, next) => {
       //file handling promise end
     });
 
-    res.send({ message: "Upload success", status: 0, body: null });
+    res.send({ message: "Upload success", status: 0, body: result });
   } catch (e) {
     console.error(e);
     res.send({ status: 1, message: e.message });

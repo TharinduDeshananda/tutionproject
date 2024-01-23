@@ -1,11 +1,11 @@
 "use client";
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import CustomInputFieldWithLabel from "../CustomInputFieldWithLabel";
 import CustomSelectWithLabel from "../CustomSelectWithLabel";
 import MultiFileUploadField from "../MultiFileUploadField";
 import { useFormik } from "formik";
 import CustomTextArea from "../CustomTextArea";
-import Spin from "@/util/Spin";
+
 import {
   useIsFetching,
   useIsMutating,
@@ -13,11 +13,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
-import { json } from "stream/consumers";
+
 import { toast } from "react-toastify";
 import LoadingComp from "../loadingcomp/LoadingComp";
 import ClassAssignmentDto from "src/models/dto/ClassAssignmentDto";
+import ExistingFileItemsComp from "./ExistingFileItemsComp";
+import { removeFileUploadFromAssignment } from "src/mutations/AssignmentMutations";
 
 type PropType = {
   teacherId: string;
@@ -43,6 +44,7 @@ type FormErrors = {
   dueDate?: string;
 };
 function AssignmentUpdateComp({ teacherId, details, id }: PropType) {
+  console.log(details);
   const initValues: FormType = {
     classCode: details.classRoom?.classCode ?? "NA",
     description: details.description,
@@ -53,9 +55,35 @@ function AssignmentUpdateComp({ teacherId, details, id }: PropType) {
     id: id,
   };
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const queryClient = useQueryClient();
   const isMutating = useIsMutating();
   const isFetching = useIsFetching();
+
+  const fileUploadMutation = useMutation({
+    mutationFn: async (files: File[]) => {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("upload", file);
+      }
+      const response = await fetch(`/api/assignment/${id}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const body = await response.json();
+
+      if (body.status !== 0 || !response.ok) throw new Error(body.body);
+      return body.body;
+    },
+    onSuccess: () => {
+      toast.success("Upload success");
+      queryClient.invalidateQueries(["assignment"]);
+    },
+    onError: (e) => {
+      toast.error("Failed: " + (e as any).message);
+    },
+  });
+
   const submitMutation = useMutation({
     mutationKey: ["assignment"],
     mutationFn: async (values: FormType) => {
@@ -74,6 +102,30 @@ function AssignmentUpdateComp({ teacherId, details, id }: PropType) {
       queryClient.invalidateQueries({ queryKey: ["assignment"] });
     },
   });
+
+  const removeFileMutation = useMutation({
+    mutationFn: async ({
+      assignmentId,
+      fileUploadId,
+    }: {
+      assignmentId: string;
+      fileUploadId: string;
+    }) => {
+      const result = await removeFileUploadFromAssignment(
+        assignmentId,
+        fileUploadId
+      );
+      if (!result) throw new Error("Remove failed");
+    },
+    onError: (er) => {
+      toast.error((er as any).message);
+    },
+    onSuccess: () => {
+      toast.success("Remove success");
+      queryClient.invalidateQueries(["assignment"]);
+    },
+  });
+
   const formik = useFormik<FormType>({
     initialValues: initValues,
     onSubmit: (values) => {
@@ -190,18 +242,56 @@ function AssignmentUpdateComp({ teacherId, details, id }: PropType) {
           />
         </div>
 
-        <h1 className="text-sm font-bold text-gray-500">
-          Add or remove files here.
+        <h1 className="col-span-1 text-sm font-bold text-gray-500 sm:col-span-2 md:col-span-3">
+          Remove existing files here.
+        </h1>
+        <ExistingFileItemsComp
+          onRemoveItem={(itemId: string) => {
+            removeFileMutation.mutate({
+              assignmentId: id,
+              fileUploadId: itemId,
+            });
+          }}
+          items={
+            details?.fileUploads?.map((i) => ({
+              name: i.name,
+              id: (i as any)._id,
+            })) ?? []
+          }
+          wrapperStyle="col-span-1 sm:col-span-2 md:col-span-3 max-w-2xl mx-auto border-blue-500 border bg-blue-100 rounded-md text-sm"
+        />
+
+        <h1 className="col-span-1 text-sm font-bold text-gray-500 sm:col-span-2 md:col-span-3">
+          Add new files here.
         </h1>
         <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-3">
           <MultiFileUploadField
             onChangeHandler={(e: React.ChangeEvent<HTMLInputElement>) => {
               console.log(e.target.files);
+
+              if (e.target.files) {
+                const files: File[] = [];
+                for (let file of e.target.files) {
+                  files.push(file);
+                }
+                setSelectedFiles(files);
+              }
             }}
           />
         </div>
         <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-3">
-          <button className="generic-button-primary">Upload</button>
+          <button
+            className="generic-button-primary"
+            disabled={isMutating > 0 || isFetching > 0}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(selectedFiles);
+              fileUploadMutation.mutate(selectedFiles);
+            }}
+          >
+            Upload
+          </button>
         </div>
       </div>
     </form>

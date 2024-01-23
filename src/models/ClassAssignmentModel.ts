@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import ClassAssignmentDto from "./dto/ClassAssignmentDto";
 import { AssignmentStatus } from "src/enum/AssignmentStatus";
+import { fileUploadScheme } from "./FileUploadModel";
 
 export const ClassAssignmentSchema = new mongoose.Schema<ClassAssignmentDto>(
   {
@@ -15,6 +16,7 @@ export const ClassAssignmentSchema = new mongoose.Schema<ClassAssignmentDto>(
     classRoom: { type: mongoose.Types.ObjectId, ref: "ClassRoom" },
     year: { type: Number },
     publisher: { type: mongoose.Types.ObjectId, ref: "User" },
+    fileUploads: [fileUploadScheme],
   },
   { timestamps: true }
 );

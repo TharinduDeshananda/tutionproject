@@ -7,7 +7,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import UserRole from "src/enum/UserRole";
 import { AssignmentStatus } from "src/enum/AssignmentStatus";
-import { PipelineStage } from "mongoose";
+import mongoose, { PipelineStage } from "mongoose";
+import { FileUploadType } from "src/models/dto/ResourceUploadDto";
+import { plainToInstance } from "class-transformer";
 
 export async function createAssignment(
   requestDto: AssignmentCreateRequestDto
@@ -177,6 +179,97 @@ export async function getTeacherOwnAssignmentsFiltered(
     return result;
   } catch (error) {
     console.error("method getTeacherOwnAssignmentsFiltered failed: ", error);
+    throw error;
+  }
+}
+
+export type AssignmentResourceUpdateType = {
+  fileDetails?: FileUploadType[];
+  assignmentId?: string;
+};
+
+export async function addResourcesInAssignment({
+  assignmentId,
+  fileDetails,
+}: AssignmentResourceUpdateType) {
+  try {
+    console.log("method addResourcesInAssignment start : ", assignmentId);
+    if (!fileDetails || fileDetails.length === 0)
+      throw new Error("At least one new file upload is needed.");
+    if (!assignmentId) throw new Error("Assignment id is required");
+    console.log(fileDetails);
+    const result = await db.AssignmentEntity.findByIdAndUpdate(assignmentId, {
+      $push: { fileUploads: { $each: fileDetails } },
+    });
+    if (result.nModified <= 0) throw new Error("No files uploaded.");
+    console.log("method addResourcesInAssignment success");
+  } catch (error) {
+    console.error("method addResourcesInAssignment failed ", error);
+    throw error;
+  }
+}
+
+export class RemoveAssignmentResourceType {
+  assignmentId?: string;
+  fileUploadId?: string;
+}
+
+export async function removeResourcesInAssignment(
+  dto: RemoveAssignmentResourceType
+) {
+  try {
+    console.log("method removeResourcesInAssignment start ", dto);
+    const session = await getServerSession(authOptions);
+    const userID = session?.user?.id;
+    if (!userID) {
+      console.log("userID is empty");
+      throw new Error("unauthorized");
+    }
+
+    const assignment = await db.AssignmentEntity.findById(dto.assignmentId);
+    if (!assignment) throw new Error("Assignment not found");
+    const publisherID = assignment.get("publisher")._id;
+    if (publisherID?.toString() !== userID?.toString()) {
+      console.log("Published user does not match");
+      throw new Error("unauthorized");
+    }
+    const result = await db.AssignmentEntity.updateOne(
+      { _id: new mongoose.Types.ObjectId(dto.assignmentId) },
+      {
+        $pull: {
+          fileUploads: { _id: new mongoose.Types.ObjectId(dto.fileUploadId) },
+        },
+      }
+    );
+    console.log(result);
+
+    if (result.modifiedCount > 0) {
+      console.log("method removeResourcesInAssignment success");
+      return true;
+    }
+    console.log("method removeResourcesInAssignment not success");
+    return false;
+  } catch (error) {
+    console.error("method removeResourcesInAssignment failed ", error);
+    throw error;
+  }
+}
+
+export async function getSingleAssignment(id: string) {
+  try {
+    console.log("method getSingleAssignment start: ");
+
+    const assignment = await db.AssignmentEntity.findById(id)
+      .populate("classRoom")
+      .populate("publisher")
+      .lean();
+    if (!assignment) throw new Error("Assignment not found");
+
+    const result = assignment;
+    console.log("method getSingleAssignment success: ");
+    return result;
+  } catch (error) {
+    console.error("method getSingleAssignment failed: ", error);
     throw error;
   }
 }
