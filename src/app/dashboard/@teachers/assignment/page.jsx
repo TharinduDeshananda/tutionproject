@@ -8,8 +8,8 @@ import React from "react";
 
 function AssignmentPage() {
   return (
-    <div className="w-full px-5 overflow-x-auto">
-      <TeacherAssignmentSummary />
+    <div className="w-full genp overflow-x-auto">
+      {/* <TeacherAssignmentSummary /> */}
       <div className="w-full flex ">
         <Link href={"/dashboard/assignment/newassignment"}>
           {" "}
