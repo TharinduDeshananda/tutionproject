@@ -12,6 +12,7 @@ export default class ClassRoomDto {
   public year?: number;
   public teacher?: UserDto;
   public students?: UserDto[];
+  public studentRequests?: UserDto[];
   public description?: string;
   public timeString?: string;
   resources?: ResourceUploadDto[];

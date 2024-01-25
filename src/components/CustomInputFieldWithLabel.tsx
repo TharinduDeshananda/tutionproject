@@ -10,7 +10,7 @@ type PropType = {
   placeholder?: string;
   type?: string;
   value?: string;
-  onChangeHandler?: (event: React.ChangeEvent) => void;
+  onChangeHandler?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   labelStyle?: string;
   wrapperStyle?: string;
   disabled?: boolean;

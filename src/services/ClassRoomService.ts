@@ -231,3 +231,199 @@ export async function getOwnClassRooms() {
     throw error;
   }
 }
+
+export async function filterClassRoomsForStudent(
+  searchTerm: string,
+  page: number = 1,
+  size: number = 10
+) {
+  try {
+    console.log("method filterClassRoomsForStudent start: ");
+
+    const session = await getServerSession(authOptions);
+    const studentID = session.user?.id;
+    if (!studentID) throw new Error("unauthorized");
+
+    const result = await db.ClassRoomEntity.aggregate([
+      { $match: { students: { $elemMatch: studentID } } },
+      {
+        $lookup: {
+          localField: "grade",
+          from: "grades",
+          foreignField: "_id",
+          as: "gradeObj",
+        },
+      },
+      {
+        $lookup: {
+          localField: "subject",
+          from: "subjects",
+          foreignField: "_id",
+          as: "subjectObj",
+        },
+      },
+      {
+        $lookup: {
+          localField: "teacher",
+          from: "users",
+          foreignField: "_id",
+          as: "teacherObj",
+        },
+      },
+      {
+        $project: {
+          teacherFullName: {
+            $concat: [
+              { $ifNull: ["$teacherObj.firstName", ""] }, // If firstName is null, use an empty string
+              " ", // Add a space between firstName and lastName
+              { $ifNull: ["$teacherObj.lastName", ""] }, // If lastName is null, use an empty string
+            ],
+          },
+          // Include other fields you need in the result
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { classCode: new RegExp(searchTerm, "i") },
+            { className: new RegExp(searchTerm, "i") },
+            { "gradeObj.gradeCode": new RegExp(searchTerm, "i") },
+            { "gradeObj.gradeName": new RegExp(searchTerm, "i") },
+            { "subjectObj.subjectName": new RegExp(searchTerm, "i") },
+            { "subjectObj.subjectCode": new RegExp(searchTerm, "i") },
+            { teacherFullName: new RegExp(searchTerm, "i") },
+            { "teacherObj.email": new RegExp(searchTerm, "i") },
+          ],
+        },
+      },
+
+      {
+        $facet: {
+          count: [{ $count: "count" }],
+          result: [{ $skip: (page - 1) * size }, { $limit: size }],
+        },
+      },
+    ]);
+
+    console.log("method filterClassRoomsForStudent success: ");
+    return result;
+  } catch (error) {
+    console.error("method filterClassRoomsForStudent failed: ", error);
+  }
+}
+
+export async function filterClassRoomsForStudentExplore(
+  searchTerm: string,
+  page: number = 1,
+  size: number = 10
+) {
+  try {
+    console.log("method filterClassRoomsForStudent start: ", searchTerm);
+
+    const session = await getServerSession(authOptions);
+    const studentID = session.user?.id;
+    if (!studentID) throw new Error("unauthorized");
+    console.log(studentID);
+    const result = await db.ClassRoomEntity.aggregate([
+      {
+        $match: {
+          students: {
+            $not: {
+              $elemMatch: {
+                $eq: studentID,
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          localField: "grade",
+          from: "grades",
+          foreignField: "_id",
+          as: "gradeObj",
+        },
+      },
+      {
+        $lookup: {
+          localField: "subject",
+          from: "subjects",
+          foreignField: "_id",
+          as: "subjectObj",
+        },
+      },
+      {
+        $lookup: {
+          localField: "teacher",
+          from: "users",
+          foreignField: "_id",
+          as: "teacherObj",
+        },
+      },
+      // {
+      //   $project: {
+      //     teacherFullName: {
+      //       $concat: [
+      //         {
+      //           $ifNull: [
+      //             {
+      //               $cond: {
+      //                 if: { $isArray: "$teacherObj" },
+      //                 then: {
+      //                   $arrayElemAt: ["$teacherObj.firstName", 0],
+      //                 },
+      //                 else: "$teacherObj.firstName",
+      //               },
+      //             },
+      //             "",
+      //           ],
+      //         },
+      //         " ",
+      //         {
+      //           $ifNull: [
+      //             {
+      //               $cond: {
+      //                 if: { $isArray: "$teacherObj" },
+      //                 then: {
+      //                   $arrayElemAt: ["$teacherObj.lastName", 0],
+      //                 },
+      //                 else: "$teacherObj.lastName",
+      //               },
+      //             },
+      //             "",
+      //           ],
+      //         },
+      //       ],
+      //     },
+      //     // Include other fields you need in the result
+      //   },
+      // },
+      {
+        $match: {
+          $or: [
+            { classCode: new RegExp(searchTerm, "i") },
+            { className: new RegExp(searchTerm, "i") },
+            { "gradeObj.gradeCode": new RegExp(searchTerm, "i") },
+            { "gradeObj.gradeName": new RegExp(searchTerm, "i") },
+            { "subjectObj.subjectName": new RegExp(searchTerm, "i") },
+            { "subjectObj.subjectCode": new RegExp(searchTerm, "i") },
+            // { teacherFullName: new RegExp(searchTerm, "i") },
+            { "teacherObj.email": new RegExp(searchTerm, "i") },
+          ],
+        },
+      },
+
+      {
+        $facet: {
+          count: [{ $count: "count" }],
+          result: [{ $skip: (page - 1) * size }, { $limit: size }],
+        },
+      },
+    ]);
+
+    console.log("method filterClassRoomsForStudent success: ");
+    return result;
+  } catch (error) {
+    console.error("method filterClassRoomsForStudent failed: ", error);
+  }
+}
