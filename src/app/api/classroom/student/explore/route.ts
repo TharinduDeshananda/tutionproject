@@ -18,3 +18,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sttus: 1, message: "failed", body: error });
   }
 }
+
+export const revalidate = 0;

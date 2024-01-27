@@ -233,7 +233,7 @@ export async function getOwnClassRooms() {
 }
 
 export async function filterClassRoomsForStudent(
-  searchTerm: string,
+  searchTerm: string = "",
   page: number = 1,
   size: number = 10
 ) {
@@ -244,8 +244,15 @@ export async function filterClassRoomsForStudent(
     const studentID = session.user?.id;
     if (!studentID) throw new Error("unauthorized");
 
+    if (!searchTerm) searchTerm = "";
     const result = await db.ClassRoomEntity.aggregate([
-      { $match: { students: { $elemMatch: studentID } } },
+      {
+        $match: {
+          students: {
+            $elemMatch: { $eq: new mongoose.Types.ObjectId(studentID) },
+          },
+        },
+      },
       {
         $lookup: {
           localField: "grade",
@@ -270,18 +277,18 @@ export async function filterClassRoomsForStudent(
           as: "teacherObj",
         },
       },
-      {
-        $project: {
-          teacherFullName: {
-            $concat: [
-              { $ifNull: ["$teacherObj.firstName", ""] }, // If firstName is null, use an empty string
-              " ", // Add a space between firstName and lastName
-              { $ifNull: ["$teacherObj.lastName", ""] }, // If lastName is null, use an empty string
-            ],
-          },
-          // Include other fields you need in the result
-        },
-      },
+      // {
+      //   $project: {
+      //     teacherFullName: {
+      //       $concat: [
+      //         { $ifNull: ["$teacherObj.firstName", ""] }, // If firstName is null, use an empty string
+      //         " ", // Add a space between firstName and lastName
+      //         { $ifNull: ["$teacherObj.lastName", ""] }, // If lastName is null, use an empty string
+      //       ],
+      //     },
+      //     // Include other fields you need in the result
+      //   },
+      // },
       {
         $match: {
           $or: [
@@ -291,7 +298,7 @@ export async function filterClassRoomsForStudent(
             { "gradeObj.gradeName": new RegExp(searchTerm, "i") },
             { "subjectObj.subjectName": new RegExp(searchTerm, "i") },
             { "subjectObj.subjectCode": new RegExp(searchTerm, "i") },
-            { teacherFullName: new RegExp(searchTerm, "i") },
+            // { teacherFullName: new RegExp(searchTerm, "i") },
             { "teacherObj.email": new RegExp(searchTerm, "i") },
           ],
         },
@@ -319,7 +326,7 @@ export async function filterClassRoomsForStudentExplore(
 ) {
   try {
     console.log("method filterClassRoomsForStudent start: ", searchTerm);
-
+    if (!searchTerm) searchTerm = "";
     const session = await getServerSession(authOptions);
     const studentID = session.user?.id;
     if (!studentID) throw new Error("unauthorized");
@@ -330,7 +337,7 @@ export async function filterClassRoomsForStudentExplore(
           students: {
             $not: {
               $elemMatch: {
-                $eq: studentID,
+                $eq: new mongoose.Types.ObjectId(studentID),
               },
             },
           },
