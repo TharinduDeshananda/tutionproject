@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "src/app/api/auth/[...nextauth]/route";
 import { getClassRoomById } from "src/services/ClassRoomService";
 
 export async function getClassRoomByClassRoomIdQuery(id: string) {
