@@ -8,20 +8,34 @@ import PaginationCompWithCallback from "@/components/NewPaginationComp/Paginatio
 import { useQuery } from "@tanstack/react-query";
 import { getStudentClassRoomsFiltered } from "src/queries/classroom/StudentClassRoomQueries";
 import { stringToColor } from "@/util/backgroundColorGen";
+import { useDebounce } from "@uidotdev/usehooks";
+import Spin from "@/util/Spin";
+import useIsBusy from "src/hooks/useIsBusy";
+import { useRouter } from "next/navigation";
 function StudentClassRoomsSummary() {
+  const isbusy = useIsBusy();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedValue = useDebounce(searchTerm, 1000);
+  const router = useRouter();
   const classRoomFilterQuery = useQuery({
-    queryKey: ["classroom", searchTerm, page],
+    queryKey: ["classroom", debouncedValue, page],
     queryFn: async ({ queryKey }) => {
-      const result = await getStudentClassRoomsFiltered("");
+      const term = queryKey[1] ?? "";
+      const pagenum = queryKey[2] ?? "";
+
+      const search = new URLSearchParams();
+      search.append("searchTerm", term);
+      search.append("page", pagenum);
+
+      const result = await getStudentClassRoomsFiltered(search.toString());
       console.log(result);
       return result ?? [];
     },
   });
 
   return (
-    <div className="flex flex-col w-full min-[500px] bg-white genp">
+    <div className="flex flex-col w-full min-h-[500px] bg-white genp">
       <div className="w-full">
         <Link href={"/dashboard/classrooms/explore"}>
           <button className="text-xs genbtn">Explore other classes</button>
@@ -38,12 +52,16 @@ function StudentClassRoomsSummary() {
         <CustomInputFieldWithLabel
           label="Search using teacher, class name, code or subject name,code"
           labelStyle="text-xs"
+          value={searchTerm}
+          onChangeHandler={(e) => {
+            setSearchTerm(e.target.value);
+          }}
         />
       </div>
+      <Spin label="please wait" show={isbusy} />
       {classRoomFilterQuery.isSuccess && (
         <>
           {/* pagination component */}
-          <div className="px-5 text-xs">Showing results 10 of 230 results</div>
           <div className="px-5 pb-5">
             <PaginationCompWithCallback
               currentPage={page}
@@ -75,6 +93,9 @@ function StudentClassRoomsSummary() {
                   (i.teacherObj?.[0]?.lastName ?? "")
                 }
                 primaryColor={stringToColor(i.classCode ?? "")}
+                onClickCard={() => {
+                  router.push(`/dashboard/classrooms/${i?._id ?? "00"}`);
+                }}
               />
             ))}
           </div>
