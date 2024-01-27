@@ -6,22 +6,28 @@ import Link from "next/link";
 
 import ClassResourcesComp from "@/components/classroom/ClassResourcesComp";
 import AddResourceComp from "@/components/classroom/AddResourceComp";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getClassRoomByClassRoomIdQuery,
   getClassRoomResourcesQuery,
 } from "src/queries/classroom/ClassRoomQueries";
 import LoadingComp from "@/components/loadingcomp/LoadingComp";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import PaginationCompWithCallback from "@/components/NewPaginationComp/PaginationCompWithCallback";
+import { toast } from "react-toastify";
+import useIsBusy from "src/hooks/useIsBusy";
+import Spin from "@/util/Spin";
 
 function StudentClassRoom() {
+  const isBusy = useIsBusy();
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
 
   const searchParams = useSearchParams();
   const pathParams = useParams();
 
-  const showResourceAddModal = searchParams?.get("resourceadd");
+  const showExitModal = searchParams?.get("exitmodal");
 
   const id = (pathParams?.room ?? "") as string;
 
@@ -53,6 +59,27 @@ function StudentClassRoom() {
     },
   });
 
+  const exitClassMutation = useMutation({
+    mutationFn: async (classId: string) => {
+      const response = await fetch(`/api/classroom/student`, {
+        method: "DELETE",
+        body: JSON.stringify({ classId: classId }),
+      });
+
+      const body = await response.json();
+      if (!response.ok || body.status !== 0) throw new Error(body.body);
+      return body.body;
+    },
+    onSuccess: () => {
+      toast.success("Class exit success");
+      queryClient.invalidateQueries(["classroom"]);
+      router.replace("/dashboard/classrooms");
+    },
+    onError: (err) => {
+      toast.error((err as any).message);
+    },
+  });
+
   if (classRoomQuery.isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen ">
@@ -77,18 +104,24 @@ function StudentClassRoom() {
         <div className="flex flex-col w-full">
           {/* class room utilities */}
           <div className="sticky top-0 min-h-[54px] flex items-center justify-end bg-white py-2 px-1 shadow-md gap-1">
-            <Link href={"?resourceadd=true"}>
+            {/* <Link href={"?resourceadd=true"}>
               <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
                 Add Resource
               </button>
-            </Link>
+            </Link> */}
             <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
-              Send Notice
+              View Notices
             </button>
 
-            <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+            <Link href={"?exitmodal=true"}>
+              <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+                Exit Class
+              </button>
+            </Link>
+
+            {/* <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
               Students
-            </button>
+            </button> */}
           </div>
 
           {/* class description */}
@@ -110,6 +143,7 @@ function StudentClassRoom() {
               {classRoomQuery.data.description}
             </p>
           </div>
+
           {/* class resources */}
           <h1 className="px-1 text-sm sm:px-5 sm:text-lg">Resources</h1>
           {classRoomResourcesQuery.isLoading && (
@@ -155,9 +189,32 @@ function StudentClassRoom() {
               </>
             )}
         </div>
-        {showResourceAddModal && (
+        {showExitModal && (
           <CustomModal>
-            <AddResourceComp roomId={id} />
+            <div className="w-full max-w-[300px] mx-auto bg-white rounded-lg min-h-[300px] flex justify-center items-center flex-col gap-y-5">
+              <div className="flex items-center justify-center w-full mx-auto">
+                <Spin label="please wait" show={isBusy} />
+              </div>
+              <h1 className="text-center genh">
+                Are you sure want to exit from class?
+              </h1>
+              <div className="flex items-center justify-center gap-x-2">
+                <Link href={"?"}>
+                  <button className="text-xs genbtn">No</button>
+                </Link>
+
+                <button
+                  className="text-xs bg-red-500 border-red-500 genbtn hover:bg-red-700 "
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    exitClassMutation.mutate(id);
+                  }}
+                >
+                  Yes
+                </button>
+              </div>
+            </div>
           </CustomModal>
         )}
       </>

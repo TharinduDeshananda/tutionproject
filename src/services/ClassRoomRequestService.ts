@@ -181,4 +181,29 @@ export async function getStudentsRequestsForTeacher(
   }
 }
 
+export async function removeStudentFromClass(classId: string) {
+  try {
+    console.log("method removeStudentFromClass start");
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    const userRole = session?.user?.role;
+
+    if (!userId || !userRole || userRole !== UserRole.STUDENT.toString()) {
+      throw new Error("unauthorized");
+    }
+
+    const result = await db.ClassRoomEntity.updateOne(
+      { _id: new mongoose.Types.ObjectId(classId) },
+      {
+        $pull: { students: userId },
+      }
+    );
+    if (result.modifiedCount == 0) throw new Error("Class exit failed");
+    console.log("method removeStudentFromClass success");
+  } catch (error) {
+    console.error("method removeStudentFromClass failed ", error);
+    throw error;
+  }
+}
+
 export const revalidate = 0;
