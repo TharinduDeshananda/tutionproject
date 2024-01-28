@@ -86,9 +86,11 @@ function TeacherClassRoom() {
               Send Notice
             </button>
 
-            <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
-              Students
-            </button>
+            <Link href={`/dashboard/classrooms/${id}/studentmanage`}>
+              <button className="px-4 py-1 text-xs text-white bg-purple-700 cursor-pointer hover:bg-purple-600">
+                Students
+              </button>
+            </Link>
           </div>
 
           {/* class description */}

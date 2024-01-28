@@ -8,6 +8,7 @@ import { db } from "src/helpers/db";
 import ClassRoomDto from "src/models/dto/ClassRoomDto";
 import SubjectDto from "src/models/dto/SubjectDto";
 import UserDto from "src/models/dto/UserDto";
+import { AggregateCountResult } from "src/models/dto/response/AggregateCountResult";
 import ClassRoomResponseDto from "src/models/dto/response/ClassRoomResponseDto";
 import PageResponse from "src/models/dto/response/PageResponse";
 
@@ -432,5 +433,75 @@ export async function filterClassRoomsForStudentExplore(
     return result;
   } catch (error) {
     console.error("method filterClassRoomsForStudent failed: ", error);
+  }
+}
+
+export class GetStudentClassType {}
+
+export async function getStudentsOfClassRoom(
+  searchTerm: string,
+  roomId: string,
+  page: number = 1,
+  size: number = 10
+): Promise<AggregateCountResult<any>> {
+  try {
+    console.log("method getStudentsOfClassRoom start");
+    if (!searchTerm) searchTerm = "";
+    const classRoom = await db.ClassRoomEntity.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(roomId) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "students",
+          foreignField: "_id",
+          as: "studentsObj",
+        },
+      },
+      {
+        $addFields: {
+          "studentsObj.fullName": {
+            $concat: [
+              {
+                $ifNull: [{ $arrayElemAt: ["$studentsObj.firstName", 0] }, ""], // If firstName is null or undefined, use an empty string
+              },
+              " ",
+              {
+                $ifNull: [{ $arrayElemAt: ["$studentsObj.lastName", 0] }, ""], // If lastName is null or undefined, use an empty string
+              },
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { "studentsObj.fullName": new RegExp(searchTerm, "i") },
+            { "studentsObj.email": new RegExp(searchTerm, "i") },
+          ],
+        },
+      },
+      {
+        $facet: {
+          count: [{ $count: "count" }],
+          result: [{ $skip: (page - 1) * size }, { $limit: size }],
+        },
+      },
+    ]);
+    if (!classRoom) return { count: 0, result: [] };
+    console.log(classRoom?.[0]?.result?.[0]?.studentsObj);
+    return {
+      count: classRoom?.[0]?.count?.[0]?.count ?? 0,
+      result: classRoom?.[0]?.result?.[0]?.studentsObj?.map(
+        (i: { fullName: any; email: any; _id: any; imgUrl: any }) => ({
+          fullName: i.fullName,
+          email: i?.email,
+          id: i?._id,
+          imgUrl: i?.imgUrl,
+        })
+      ),
+    };
+  } catch (error) {
+    console.error("method getStudentsOfClassRoom failed: ", error);
+    throw error;
   }
 }
