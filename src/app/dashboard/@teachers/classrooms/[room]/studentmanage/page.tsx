@@ -2,11 +2,13 @@
 import SmallAvatar from "@/components/Avatars/SmallAvatar";
 import CustomInputFieldWithLabel from "@/components/CustomInputFieldWithLabel";
 import PaginationCompWithCallback from "@/components/NewPaginationComp/PaginationCompWithCallback";
+import CustomModal from "@/components/modalcomp/CustomModal";
 import Spin from "@/util/Spin";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import useIsBusy from "src/hooks/useIsBusy";
 
 function StudentManagePage() {
@@ -64,33 +66,35 @@ function StudentManagePage() {
           <Spin label="please wait" show={isBusy} />
         </div>
 
-        {filterOwnStudentQuery.isSuccess && (
-          <>
-            <h1 className="text-xs text-gray-500">
-              {filterOwnStudentQuery.data?.count} results found.
-            </h1>
-            <PaginationCompWithCallback
-              onClickPage={() => {}}
-              currentPage={page}
-              perPage={10}
-              totalPages={Math.ceil(
-                (filterOwnStudentQuery.data?.count ?? 0) / 10
-              )}
-            />
+        {filterOwnStudentQuery.isSuccess &&
+          filterOwnStudentQuery.data.result && (
+            <>
+              <h1 className="text-xs text-gray-500">
+                {filterOwnStudentQuery.data?.count} results found.
+              </h1>
+              <PaginationCompWithCallback
+                onClickPage={() => {}}
+                currentPage={page}
+                perPage={10}
+                totalPages={Math.ceil(
+                  (filterOwnStudentQuery.data?.count ?? 0) / 10
+                )}
+              />
 
-            <div className="flex flex-col w-full gap-y-2">
-              {filterOwnStudentQuery.data.result.map((i, index) => (
-                <StudentManageTile
-                  key={index}
-                  name={i?.fullName ?? "Name NA"}
-                  email={i?.email ?? "Email NA"}
-                  studentId={i?.id}
-                  img={i?.imgUrl ?? "/girl.png"}
-                />
-              ))}
-            </div>
-          </>
-        )}
+              <div className="flex flex-col w-full gap-y-2">
+                {filterOwnStudentQuery.data.result?.map((i, index) => (
+                  <StudentManageTile
+                    key={index}
+                    name={i?.fullName ?? "Name NA"}
+                    email={i?.email ?? "Email NA"}
+                    studentId={i?.id}
+                    img={i?.imgUrl ?? "/girl.png"}
+                    classId={classId as string}
+                  />
+                ))}
+              </div>
+            </>
+          )}
       </div>
     </div>
   );
@@ -101,23 +105,94 @@ function StudentManageTile({
   name = "Name NA",
   email = "Email NA",
   studentId = "",
+  classId,
 }: {
   img: string;
   name: string;
   email: string;
   studentId: string;
+  classId: string;
 }) {
+  const [showModal, setShowModal] = useState(false);
+  const isBusy = useIsBusy();
+  const queryClient = useQueryClient();
+  const removeStudentMutation = useMutation({
+    mutationFn: async ({ clzId, stdId }: { clzId: string; stdId: string }) => {
+      const response = await fetch("/api/classroom/student", {
+        method: "DELETE",
+        body: JSON.stringify({ classId: clzId, studentId: stdId }),
+      });
+      const body = await response.json();
+
+      if (!response.ok || body.status !== 0) throw new Error(body.body);
+    },
+
+    onSuccess: () => {
+      toast.success("Remove success");
+      setShowModal(false);
+      queryClient.invalidateQueries(["classroom", "student"]);
+    },
+    onError: (er) => {
+      toast.error("Remove failed");
+    },
+  });
+
   return (
-    <div className="flex flex-row items-center w-full p-2 border rounded-sm shadow-md gap-x-2">
-      <SmallAvatar imgUrl={img} wrapperStyle="" />
-      <div className="flex flex-col justify-center flex-1">
-        <h1 className="text-xs font-bold text-gray-500">{name}</h1>
-        <h1 className="text-xs text-gray-500">{email}</h1>
+    <>
+      <div className="flex flex-row items-center w-full p-2 border rounded-sm shadow-md gap-x-2">
+        <SmallAvatar imgUrl={img} wrapperStyle="" />
+        <div className="flex flex-col justify-center flex-1">
+          <h1 className="text-xs font-bold text-gray-500">{name}</h1>
+          <h1 className="text-xs text-gray-500">{email}</h1>
+        </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowModal(true);
+          }}
+          className="text-xs bg-red-500 border-red-500 genbtn hover:border-red-500 hover:bg-red-400"
+        >
+          Remove
+        </button>
       </div>
-      <button className="text-xs bg-red-500 border-red-500 genbtn hover:border-red-500 hover:bg-red-400">
-        Remove
-      </button>
-    </div>
+      {showModal && (
+        <CustomModal>
+          <div className="flex flex-col items-center justify-center w-full rounded-md genp gap-y-2">
+            <Spin label="please wait" show={isBusy} />
+            <h1 className="text-sm text-center genh">Remove this student?</h1>
+            <div className="flex flex-row items-center justify-center w-full gap-x-2">
+              <button
+                className="text-xs genbtn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowModal(false);
+                }}
+                disabled={isBusy}
+              >
+                No
+              </button>
+              <button
+                className="text-xs genbtn"
+                disabled={isBusy}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+
+                  removeStudentMutation.mutate({
+                    clzId: classId,
+                    stdId: studentId,
+                  });
+                }}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </CustomModal>
+      )}
+    </>
   );
 }
 

@@ -181,21 +181,38 @@ export async function getStudentsRequestsForTeacher(
   }
 }
 
-export async function removeStudentFromClass(classId: string) {
+export async function removeStudentFromClass(
+  classId: string,
+  studentId: string = ""
+) {
   try {
     console.log("method removeStudentFromClass start");
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     const userRole = session?.user?.role;
 
-    if (!userId || !userRole || userRole !== UserRole.STUDENT.toString()) {
+    if (!userId || !userRole) {
       throw new Error("unauthorized");
+    }
+    if (userRole === UserRole.STUDENT.toString()) {
+      studentId = userId;
+    }
+
+    if (userRole === UserRole.TEACHER.toString()) {
+      const classRoomExistsWithTeacher = await db.ClassRoomEntity.findOne({
+        _id: new mongoose.Types.ObjectId(classId),
+        teacher: new mongoose.Types.ObjectId(userId),
+      });
+      if (!classRoomExistsWithTeacher) {
+        console.error("teacher do not own the class");
+        throw new Error("unauthorized;");
+      }
     }
 
     const result = await db.ClassRoomEntity.updateOne(
       { _id: new mongoose.Types.ObjectId(classId) },
       {
-        $pull: { students: userId },
+        $pull: { students: studentId },
       }
     );
     if (result.modifiedCount == 0) throw new Error("Class exit failed");

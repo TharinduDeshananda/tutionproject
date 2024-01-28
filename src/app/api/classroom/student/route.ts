@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { classId } = await request.json();
+    const { classId, studentId } = await request.json();
     if (!classId) throw new Error("class id is required");
-    await removeStudentFromClass(classId);
+    await removeStudentFromClass(classId, studentId);
     return NextResponse.json({ status: 0, message: "success", body: true });
   } catch (error) {
     console.error(error);
