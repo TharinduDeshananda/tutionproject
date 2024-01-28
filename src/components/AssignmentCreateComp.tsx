@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import CustomInputFieldWithLabel from "./CustomInputFieldWithLabel";
 import CustomSelectWithLabel from "./CustomSelectWithLabel";
 import MultiFileUploadField from "./MultiFileUploadField";
@@ -51,6 +51,33 @@ function AssignmentCreateComp({ teacherId }: PropType) {
   const queryClient = useQueryClient();
   const isMutating = useIsMutating();
   const isFetching = useIsFetching();
+  const [assignmentId, setAssignmentId] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const fileUploadMutation = useMutation({
+    mutationFn: async (files: File[]) => {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("upload", file);
+      }
+      const response = await fetch(`/api/assignment/${assignmentId}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const body = await response.json();
+
+      if (body.status !== 0 || !response.ok) throw new Error(body.body);
+      return body.body;
+    },
+    onSuccess: () => {
+      toast.success("Upload success");
+      queryClient.invalidateQueries(["assignment"]);
+    },
+    onError: (e) => {
+      toast.error("Failed: " + (e as any).message);
+    },
+  });
+
   const submitMutation = useMutation({
     mutationKey: ["assignment"],
     mutationFn: async (values: FormType) => {
@@ -60,12 +87,15 @@ function AssignmentCreateComp({ teacherId }: PropType) {
       });
       const body = await response.json();
       if (!response.ok || body.status !== 0) throw new Error(body.message);
+      return body.body;
     },
     onError: (e) => {
       toast.error((e as any).message);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Assignment created");
+      console.log(data);
+      setAssignmentId(data.id);
       queryClient.invalidateQueries({ queryKey: ["assignment"] });
     },
   });
@@ -212,7 +242,10 @@ function AssignmentCreateComp({ teacherId }: PropType) {
             value="Create Assignment"
             className="generic-button-primary "
             disabled={
-              classCodeQuery.isLoading || isFetching > 0 || isMutating > 0
+              classCodeQuery.isLoading ||
+              isFetching > 0 ||
+              isMutating > 0 ||
+              !!assignmentId
             }
           />
         </div>
@@ -224,11 +257,29 @@ function AssignmentCreateComp({ teacherId }: PropType) {
           <MultiFileUploadField
             onChangeHandler={(e: React.ChangeEvent<HTMLInputElement>) => {
               console.log(e.target.files);
+              if (e.target.files) {
+                const files: File[] = [];
+                for (let file of e.target.files) {
+                  files.push(file);
+                }
+                setSelectedFiles(files);
+              }
             }}
           />
         </div>
-        <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-3">
-          <button className="generic-button-primary">Upload</button>
+        <div className="flex flex-col items-center justify-center col-span-1 sm:col-span-2 md:col-span-3 gap-y-2">
+          <button
+            className="generic-button-primary"
+            disabled={isFetching > 0 || isMutating > 0}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(selectedFiles);
+              fileUploadMutation.mutate(selectedFiles);
+            }}
+          >
+            Upload
+          </button>
         </div>
       </div>
     </form>
