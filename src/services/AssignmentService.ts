@@ -156,6 +156,17 @@ export async function getTeacherOwnAssignmentsFiltered(
 
     pipeline.push({ $match: { "publisherObj.email": teacherEmail } });
 
+    if (filter.classCode) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { "classRoomObj.classCode": new RegExp(filter.classCode, "i") },
+            { "classRoomObj.className": new RegExp(filter.classCode, "i") },
+          ],
+        },
+      });
+    }
+
     if (filter.name && filter.name.length !== 0)
       pipeline.push({ $match: { name: new RegExp(filter.name, "i") } });
     if (filter.status) pipeline.push({ $match: { status: filter.status } });
@@ -174,9 +185,23 @@ export async function getTeacherOwnAssignmentsFiltered(
       },
     });
 
-    const result = await db.AssignmentEntity.aggregate(pipeline);
-    console.log(result);
-    return result;
+    const assignments = await db.AssignmentEntity.aggregate(pipeline);
+    console.log(assignments);
+    if (!assignments) return { count: 0, result: [] };
+
+    return {
+      count: assignments?.[0]?.count?.[0].count,
+      result: assignments?.[0]?.result?.map((i) => ({
+        id: i?._id,
+        name: i?.name,
+        description: i?.description,
+        dueDate: i?.dueDate,
+        status: i?.status,
+        classCode: i?.classRoomObj?.[0]?.classCode,
+        className: i?.classRoomObj?.[0]?.className,
+        teacherSide: true,
+      })),
+    };
   } catch (error) {
     console.error("method getTeacherOwnAssignmentsFiltered failed: ", error);
     throw error;
@@ -271,5 +296,92 @@ export async function getSingleAssignment(id: string) {
   } catch (error) {
     console.error("method getSingleAssignment failed: ", error);
     throw error;
+  }
+}
+
+export async function filterAssignmentsForUser(
+  filter: TeacherAssignmentFilterType
+) {
+  try {
+    console.log("method filterAssignmentsForUser start");
+    const session = await getServerSession(authOptions);
+    const studentId = session?.user?.id;
+    if (!studentId) {
+      console.error("student id from session failed");
+      throw new Error("unauthorized");
+    }
+
+    const pipeline: PipelineStage[] = [
+      {
+        $lookup: {
+          localField: "classRoom",
+          foreignField: "_id",
+          from: "classrooms",
+          as: "classRoomObj",
+        },
+      },
+      {
+        $match: { "classRoomObj.students": { $elemMatch: { $eq: studentId } } },
+      },
+    ];
+
+    if (filter.name)
+      pipeline.push({
+        $match: { name: new RegExp(filter.name) },
+      });
+    if (filter.status)
+      pipeline.push({
+        $match: { status: filter.status },
+      });
+    if (filter.classCode) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { "classRoomObj.classCode": new RegExp(filter.classCode, "i") },
+            { "classRoomObj.className": new RegExp(filter.classCode, "i") },
+          ],
+        },
+      });
+    }
+
+    if (filter.after)
+      pipeline.push({
+        $match: { dueDate: { $gte: filter.after } },
+      });
+    if (filter.before)
+      pipeline.push({
+        $match: { dueDate: { $lte: filter.before } },
+      });
+
+    const page = filter.page ?? 1;
+    const size = filter.size ?? 10;
+
+    pipeline.push({
+      $facet: {
+        count: [{ $count: "count" }],
+        result: [{ $skip: (page - 1) * size }, { $limit: size }],
+      },
+    });
+
+    const assignments = await db.AssignmentEntity.aggregate(pipeline);
+
+    console.log("method filterAssignmentsForUser success");
+
+    if (!assignments) return { count: 0, result: [] };
+
+    return {
+      count: assignments?.[0]?.count?.[0].count,
+      result: assignments?.[0]?.result?.map((i) => ({
+        id: i?._id,
+        name: i?.name,
+        description: i?.description,
+        dueDate: i?.dueDate,
+        status: i?.status,
+        classCode: i?.classRoomObj?.[0]?.classCode,
+        className: i?.classRoomObj?.[0]?.className,
+      })),
+    };
+  } catch (error) {
+    console.error("method filterAssignmentsForUser failed: ", error);
   }
 }

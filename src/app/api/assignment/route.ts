@@ -4,17 +4,27 @@ import AssignmentCreateRequestDto from "src/models/dto/request/AssignmentCreateR
 import {
   TeacherAssignmentFilterType,
   createAssignment,
+  filterAssignmentsForUser,
   getTeacherOwnAssignmentsFiltered,
 } from "src/services/AssignmentService";
 
 export async function GET(request: NextRequest) {
   try {
     const params = request.nextUrl.searchParams;
+
+    const isStudent = params.get("isstudent");
+
     const filter: TeacherAssignmentFilterType = {};
     for (let [key, value] of params.entries()) {
       filter[key] = value;
     }
-    const result = await getTeacherOwnAssignmentsFiltered(filter);
+    let result;
+    if (isStudent) {
+      result = await filterAssignmentsForUser;
+    } else {
+      result = await getTeacherOwnAssignmentsFiltered(filter);
+    }
+
     console.log(result);
     return NextResponse.json({ status: 0, message: "success", body: result });
   } catch (e) {

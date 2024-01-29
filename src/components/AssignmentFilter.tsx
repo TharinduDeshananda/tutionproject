@@ -33,7 +33,7 @@ function AssignmentFilter({ style = {} }) {
       const response = await fetch("/api/assignment?" + (queryKey[1] ?? ""));
       const body = await response.json();
       console.log(body);
-      return body.body?.[0] ?? {};
+      return body.body ?? {};
     },
   });
 
@@ -120,17 +120,14 @@ function AssignmentFilter({ style = {} }) {
           style={{ alignSelf: "end" }}
         /> */}
       </form>{" "}
-      {filterQuery.isSuccess &&
-        (filterQuery.data?.count?.[0]?.count ?? 0) > 0 && (
-          <PaginationCompWithCallback
-            perPage={10}
-            totalPages={Math.ceil(
-              (filterQuery.data.count?.[0].count ?? 0) / 10
-            )}
-            currentPage={currentPage}
-            onClickPage={(num) => setCurrentPage(num)}
-          />
-        )}
+      {filterQuery.isSuccess && (filterQuery.data?.count ?? 0) > 0 && (
+        <PaginationCompWithCallback
+          perPage={10}
+          totalPages={Math.ceil((filterQuery.data.count ?? 0) / 10)}
+          currentPage={currentPage}
+          onClickPage={(num) => setCurrentPage(num)}
+        />
+      )}
       {filterQuery.isLoading && (
         <div className="flex items-center justify-center w-full my-5 genp">
           <LoadingComp />
@@ -172,10 +169,14 @@ function AssignmentFilter({ style = {} }) {
               <tr
                 key={index}
                 onClick={() => {
-                  router.push(
-                    "/dashboard/assignment/updateassignment/" +
-                      (item?._id?.toString() ?? "")
-                  );
+                  if (item?.teacherSide) {
+                    router.push(
+                      "/dashboard/assignment/updateassignment/" +
+                        (item?.id?.toString() ?? "")
+                    );
+                    return;
+                  }
+                  router.push("/dashboard/assignment");
                 }}
                 className="transition-colors duration-300 ease-out cursor-pointer hover:bg-blue-100"
               >
@@ -183,7 +184,10 @@ function AssignmentFilter({ style = {} }) {
                   {item?.name ?? "NA"}
                 </td>
                 <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap md:table-cell">
-                  {item?.classRoomObj?.[0]?.classCode ?? "NA"}
+                  <div className="text-xs font-bold">
+                    {item?.className ?? "NA"}
+                  </div>
+                  <div className="text-xs ">{item?.classCode ?? "NA"}</div>
                 </td>
 
                 <td className="hidden px-2 py-4 text-xs text-gray-500 whitespace-nowrap sm:table-cell">
