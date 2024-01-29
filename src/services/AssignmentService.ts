@@ -190,7 +190,7 @@ export async function getTeacherOwnAssignmentsFiltered(
     if (!assignments) return { count: 0, result: [] };
 
     return {
-      count: assignments?.[0]?.count?.[0].count,
+      count: assignments?.[0]?.count?.[0]?.count,
       result: assignments?.[0]?.result?.map((i) => ({
         id: i?._id,
         name: i?.name,
@@ -321,7 +321,11 @@ export async function filterAssignmentsForUser(
         },
       },
       {
-        $match: { "classRoomObj.students": { $elemMatch: { $eq: studentId } } },
+        $match: {
+          "classRoomObj.students": {
+            $elemMatch: { $eq: new mongoose.Types.ObjectId(studentId) },
+          },
+        },
       },
     ];
 
@@ -368,9 +372,9 @@ export async function filterAssignmentsForUser(
     console.log("method filterAssignmentsForUser success");
 
     if (!assignments) return { count: 0, result: [] };
-
+    console.log(assignments);
     return {
-      count: assignments?.[0]?.count?.[0].count,
+      count: assignments?.[0]?.count?.[0]?.count,
       result: assignments?.[0]?.result?.map((i) => ({
         id: i?._id,
         name: i?.name,

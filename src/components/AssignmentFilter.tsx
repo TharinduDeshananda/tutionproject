@@ -20,7 +20,7 @@ type FormType = {
 };
 const initValues: FormType = { status: "" };
 
-function AssignmentFilter({ style = {} }) {
+function AssignmentFilter({ style = {}, isStudent = false }) {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const isFetching = useIsFetching();
@@ -30,7 +30,9 @@ function AssignmentFilter({ style = {} }) {
     queryFn: async ({ queryKey }) => {
       console.log(queryKey[1]);
 
-      const response = await fetch("/api/assignment?" + (queryKey[1] ?? ""));
+      const response = await fetch(
+        `/api/assignment?isstudent=${isStudent}&` + (queryKey[1] ?? "")
+      );
       const body = await response.json();
       console.log(body);
       return body.body ?? {};
@@ -46,6 +48,7 @@ function AssignmentFilter({ style = {} }) {
         params.append(key, values[key]);
       }
       params.append("page", (currentPage ?? 1).toString());
+
       setQueryString(params.toString());
     },
   });

@@ -13,15 +13,19 @@ export async function GET(request: NextRequest) {
     const params = request.nextUrl.searchParams;
 
     const isStudent = params.get("isstudent");
+    console.log(isStudent);
 
     const filter: TeacherAssignmentFilterType = {};
     for (let [key, value] of params.entries()) {
       filter[key] = value;
     }
     let result;
-    if (isStudent) {
-      result = await filterAssignmentsForUser;
+    if (isStudent === "true") {
+      console.log("get assignments for student");
+      result = await filterAssignmentsForUser(filter);
     } else {
+      console.log("get assignments for teacher");
+
       result = await getTeacherOwnAssignmentsFiltered(filter);
     }
 
