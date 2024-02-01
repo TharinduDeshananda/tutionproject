@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import useIsBusy from "src/hooks/useIsBusy";
 import { startQuiz } from "src/mutations/QuizMutations";
-import { getTeacherOwnClassRooms } from "src/queries/classroom/ClassRoomQueries";
+import { getTeacherOwnClassRoomsCodes } from "src/queries/classroom/ClassRoomQueries";
 
 const formInitValues = {
   name: "",
@@ -51,7 +51,7 @@ function QuizCreatePage() {
   const teacherClassRoomsQuery = useQuery({
     queryKey: ["classRoom", "own"],
     queryFn: async () => {
-      const result = await getTeacherOwnClassRooms();
+      const result = await getTeacherOwnClassRoomsCodes();
 
       console.log(result);
       formik.setFieldValue("classCode", result?.[0]?.classCode);
@@ -303,6 +303,19 @@ function QuizCreatePage() {
             onQuesionChange={onQuestionUpdate}
             questionId={i.id}
             index={index}
+            initQuestionState={{
+              id: i.id,
+              question: i.text,
+              mutipleCorrect: false,
+              anyCorrect: false,
+              editing: false,
+              answers:
+                i?.answers?.map((j) => ({
+                  text: j.text,
+                  correct: j.correct,
+                  id: j.id,
+                })) ?? [],
+            }}
           />
         ))}
       </div>

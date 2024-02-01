@@ -37,7 +37,7 @@ export async function createQuiz(dto: CreateQuizDto): Promise<CreateQuizDto> {
     console.log(user);
     console.log("method createQuiz start");
     if (!dto.id) {
-      console.log("creating new quiz");
+      console.log("creating new quiz ", dto);
       try {
         await quizValidator.validate(dto);
       } catch (error) {
@@ -60,6 +60,16 @@ export async function createQuiz(dto: CreateQuizDto): Promise<CreateQuizDto> {
       };
     } else {
       console.log("updating existing quiz");
+
+      if (!!dto && !!dto.questions && dto.questions.length > 0) {
+        dto.questions.forEach((i) => {
+          delete i["_id"];
+          i.answers.forEach((j) => {
+            delete j["_id"];
+          });
+        });
+      }
+      console.log("here is dto: ", dto);
       const existing = await db.QuizEntity.findById(dto.id);
       if (!existing) throw new Error("Quiz not found. create quiz first");
       console.log(existing?.publisher?.toString(), " - ", user);
@@ -76,6 +86,8 @@ export async function createQuiz(dto: CreateQuizDto): Promise<CreateQuizDto> {
       if (!dto.questions || dto.questions.length === 0)
         throw new Error("Need to have at least one question");
       existing.set("questions", dto.questions);
+
+      console.log("here is existing: ", JSON.stringify(dto.questions));
       await existing.save();
       console.log("method createQuiz success");
       return {

@@ -24,6 +24,7 @@ function QuizUpdatePage({ params }) {
   const quizId = params.id;
   const startQuizMutation = useMutation({
     mutationFn: async (dto) => {
+      console.log(dto);
       const result = await startQuiz(dto);
       return result;
     },
@@ -69,13 +70,14 @@ function QuizUpdatePage({ params }) {
 
       formik.setValues({
         classCode: result.classCode,
-        deadline: new Date(result.deadline ?? "").toISOString(),
+        deadline: getDateTimeForInputFields(new Date(result.deadline)),
         description: result.description,
         id: result.id,
         name: result.name,
         status: result.status,
       });
       if (!result.id) throw new Error("Quiz details fetching failed");
+      console.log(result.questions);
       setCurrentQuestions(result.questions);
       return result;
     },
@@ -92,7 +94,9 @@ function QuizUpdatePage({ params }) {
     });
   };
 
-  const addQuestion = () => {
+  const addQuestion = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (currentQuestions.length === 20) return;
     setCurrentQuestions((current) => {
       return [...current, { id: currentId + 1 }];
@@ -307,6 +311,19 @@ function QuizUpdatePage({ params }) {
             onQuesionChange={onQuestionUpdate}
             questionId={i.id}
             index={index}
+            initQuestionState={{
+              id: i.id,
+              text: i.text,
+              mutipleCorrect: false,
+              anyCorrect: false,
+              editing: false,
+              answers:
+                i?.answers?.map((j) => ({
+                  text: j.text,
+                  correct: j.correct,
+                  id: j.id,
+                })) ?? [],
+            }}
           />
         ))}
       </div>

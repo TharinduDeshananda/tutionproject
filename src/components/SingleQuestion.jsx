@@ -22,22 +22,21 @@ function SingleQuestion({
   onRemoveQuestion = () => {},
   questionId,
   index,
+  initQuestionState = {},
 }) {
   const [haveChanges, setHaveChanges] = useState(false);
   const [showModal, setShowModal] = useState({ show: false, data: {} });
   const [questionState, setQuestionState] = useState({
-    id: questionId,
-    question: "",
+    id: initQuestionState.id,
+    text: initQuestionState.text,
     mutipleCorrect: false,
     anyCorrect: false,
     editing: false,
-    answers: [],
+    answers: initQuestionState.answers ?? [],
   });
 
-  useEffect(() => {
-    setQuestionState((current) => ({ ...current, id: questionId }));
-  }, [questionId]);
-
+  console.log(questionState);
+  console.log(initQuestionState);
   const getFieldNameForAnswer = (answerId) => {
     return `q${questionState.id}-${answerId}`;
   };
@@ -45,7 +44,9 @@ function SingleQuestion({
   const removeAnswer = (answerId) => {
     setHaveChanges(true);
     setQuestionState((current) => {
-      const filteredAnswers = current.answers.filter((c) => c.id !== answerId);
+      const filteredAnswers = current?.answers?.filter(
+        (c) => c.id !== answerId
+      );
       for (let i = 0; i < filteredAnswers.length; ++i) {
         filteredAnswers[i].id = i + 1;
       }
@@ -119,7 +120,7 @@ function SingleQuestion({
         />
         <textarea
           rows={3}
-          defaultValue={questionState.question}
+          defaultValue={questionState.text}
           placeholder="type your question here..."
           onInput={(event) => {
             setHaveChanges(true);
@@ -179,7 +180,9 @@ function SingleQuestion({
         <div className="flex items-center justify-end w-full col-span-2 ">
           <button
             className="self-end px-5 py-2 text-xs text-white bg-blue-700 rounded-md cursor-pointer hover:bg-blue-600"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
               setShowModal({ show: true, data: {} });
             }}
           >
@@ -190,7 +193,9 @@ function SingleQuestion({
         <div className="flex items-center justify-center col-span-2">
           <button
             className="self-start px-5 py-2 text-xs text-white bg-blue-700 rounded-md cursor-pointer disabled:bg-gray-500 disabled:hover:bg-gray-500 disabled:cursor-default hover:bg-blue-600"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
               onQuesionChange(questionState);
               setHaveChanges(false);
             }}
