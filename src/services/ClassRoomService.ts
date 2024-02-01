@@ -233,6 +233,30 @@ export async function getOwnClassRooms() {
   }
 }
 
+export async function getOwnClassRoomsCodes() {
+  try {
+    console.log("method getOwnClassRoomsCodes start");
+    const session = await getServerSession(authOptions);
+    const teacherId = session?.user?.id;
+    if (!teacherId) throw new Error("unauthorized");
+    console.log(teacherId);
+    const classCodes: ClassRoomDto[] | null = await db.ClassRoomEntity.find({
+      teacher: new mongoose.Types.ObjectId(teacherId ?? ""),
+    }).lean();
+
+    console.log("method getOwnClassRoomsCodes success:");
+    return (
+      classCodes?.map((i) => ({
+        classCode: i.classCode,
+        className: i.className,
+      })) ?? []
+    );
+  } catch (error) {
+    console.error("method getOwnClassRoomsCodes failed: ", error);
+    throw error;
+  }
+}
+
 export async function filterClassRoomsForStudent(
   searchTerm: string = "",
   page: number = 1,

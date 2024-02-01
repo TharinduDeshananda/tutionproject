@@ -41,3 +41,12 @@ export async function getTeacherOwnClassRooms() {
     throw new Error("Class rooms fetching failed: ", body.message);
   return body.body;
 }
+export async function getTeacherOwnClassRoomsCodes() {
+  const response = await fetch("/api/teacher/classrooms/codes", {
+    method: "GET",
+  });
+  const body = await response.json();
+  if (body.status !== 0)
+    throw new Error("Class rooms fetching failed: ", body.message);
+  return body.body;
+}

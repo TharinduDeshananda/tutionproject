@@ -4,11 +4,13 @@ import QuizFilterComp from "@/components/quiz/QuizFilterComp";
 import Spin from "@/util/Spin";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import useIsBusy from "src/hooks/useIsBusy";
 import { getQuizesQuery } from "src/queries/quiz/QuizQueries";
 
 function QuizPage() {
+  const router = useRouter();
   const isBusy = useIsBusy();
   const [page, setPage] = useState(1);
   const [queryString, setQueryString] = useState("");
@@ -117,7 +119,7 @@ function QuizPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    router.push(`classrooms/${item.name}`);
+                    router.push(`/dashboard/quiz/update-quiz/${item._id}`);
                   }}
                 >
                   <td className="px-2 py-4 text-xs font-medium text-gray-900 whitespace-nowrap ">

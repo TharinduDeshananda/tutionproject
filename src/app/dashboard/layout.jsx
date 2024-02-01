@@ -10,7 +10,7 @@ async function DashboardLayout(props) {
   if (!serverSession) redirect("/login", "replace");
 
   const userRole = serverSession.user.role;
-  if (!userRole) throw new Error("Invalid access");
+  if (!userRole) redirect("/login");
 
   return (
     <div className="w-full min-h-[100vh] flex flex-row max-w-[100vw]">
